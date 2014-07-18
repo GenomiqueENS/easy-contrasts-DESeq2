@@ -1,7 +1,7 @@
 #!/usr/bin/env Rscript
 ###############################################################################
-## R script for generation of contrast matrix using by the 
-## DESeq2 script for complex comparison 
+## R script for generation of contrast matrix using by  
+## DESeq2 for complex comparison 
 # 
 ## Author : Xavier Bauquet
 ###############################################################################
@@ -16,7 +16,8 @@ args <- commandArgs(TRUE)
 designPath <- args[1]
 deseqModel <- args[2]
 comparisonPath <- args[3]
-verbose <- args[4]
+contrastFile <- args[4]
+verbose <- toupper(args[5])
 
 if(verbose=="TRUE"){            
     # Print date, hours, packages version and params for log file 
@@ -157,7 +158,7 @@ for(i in 1:nrow(contrastData)){
 # suppression of the 2 first row of the data frame due to the construction
 finalData <- finalData[3:nrow(finalData),]
 # saving of the contrast matrix
-write.table(finalData, "contrastMatrix.tsv",sep="\t",row.names=F, quote=F)
+write.table(finalData, contrastFile,sep="\t",row.names=F, quote=F)
 
                 
     # Print date, hours

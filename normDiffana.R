@@ -17,19 +17,19 @@
 # Ouput:
 #   countMatrix : a reads count matrix
 #
-# Author : Vivien DESHAIES
+# Original author : Vivien DESHAIES
 # -----------------------------------------------------------------------------
-buildCountMatrix <- function(files, sampleLabel){
+buildCountMatrix <- function(files, sampleLabel,expHeader){
     
     # read first file and create countMatrix
-    countMatrix <- read.table(files[1],header=T,stringsAsFactors=F,quote="")[,c("Id","Count")]
+    countMatrix <- read.table(files[1],header=as.logical(expHeader),stringsAsFactors=F,quote="")[,c("Id","Count")]
     # lowercase countMatrix columns names
     colnames(countMatrix) <- tolower(colnames(countMatrix))
     
     # read and merge all remaining files with the first
     for(i in 2:length(files)){
         # read files
-        exp <- read.table(files[i],header=T,stringsAsFactors=F,quote="")[,c("Id","Count")]
+        exp <- read.table(files[i],header=as.logical(expHeader),stringsAsFactors=F,quote="")[,c("Id","Count")]
         # lowercase exp columns names
         colnames(exp) <- c("id", paste("count", i, sep=""))
         # merge file data to count matrix by id
@@ -50,7 +50,7 @@ buildCountMatrix <- function(files, sampleLabel){
 # 
 # Delete genes row whithout read count in a count matrix
 #
-# Author : Vivien DESHAIES
+# Original author : Vivien DESHAIES
 # -----------------------------------------------------------------------------
 deleteUnexpressedGene <- function(countMatrix){
     # Delete empty rows
@@ -66,7 +66,7 @@ deleteUnexpressedGene <- function(countMatrix){
 #   outpath : the path where to save file
 #   fileName : the file name
 #
-# Author : Vivien DESHAIES
+# Original author : Vivien DESHAIES
 # -----------------------------------------------------------------------------
 
 saveCountMatrix <- function(countMatrix,fileName){
@@ -104,13 +104,14 @@ printInformationStart <- function(args){
     cat("\n\n########################\n")
     cat("Params\n")
     cat("########################\n")
-    cat(paste("Figures                                        =", args[1]))
-    cat(paste("\nDifferential analysis                          =", args[2]))
-    cat(paste("\nFigures of the differential analysis           =", args[3]))
+    cat(paste("Figures                                        =", toupper(args[1])))
+    cat(paste("\nDifferential analysis                          =", toupper(args[2])))
+    cat(paste("\nFigures of the differential analysis           =", toupper(args[3])))
     cat(paste("\nContrast matrix for differential analysis      =", args[4]))
     cat(paste("\nName of the design file                        =", args[5]))
     cat(paste("\nDESeq2 modele                                  =", args[6]))
     cat(paste("\nProject name                                   =",args[7]))
+    cat(paste("\nHeader on expression files                     =",toupper(args[8])))
     cat("\n\n########################\n\n")
 }
 ###############################################################################
@@ -285,9 +286,8 @@ normPlots <- function(verbose, projectName, dds){
         plot(hclust(dist.mat), main=paste("Pooled and Normalised cluster dendrogram - ", projectName, sep=""), xlab="")
     dev.off()
 
-
     if(verbose=="TRUE")cat("      Fig 9 - Pooled and Normalised PCA\n") 
-    pcaCount <- PCA(t(counts(dds)), graph=FALSE)
+    pcaCount <- PCA(t(counts(dds, normalized=TRUE)), graph=FALSE)
     png(paste("normalised_PCA - ",projectName,".png",sep=""),width=1000, height=600)
         par(mar=c(5,5,5,20))
         plot.PCA(pcaCount, choix="ind", col.ind=as.character(colData(dds)$coLors), title = paste("Pooled and normalised PCA ", projectName, sep=""))
@@ -447,14 +447,15 @@ printInformationEnd <- function(){
 args <- commandArgs(TRUE)
 # -----------------------------------------------------------------------------
 # Parameters
-normFigTest <- args[1]
-diffanaTest <- args[2]
-diffanaFigTest <- args[3]
+normFigTest <- toupper(args[1])
+diffanaTest <- toupper(args[2])
+diffanaFigTest <- toupper(args[3])
 contrastTest <- args[4]
 designPath <- args[5]
 deseqModel <- args[6]
 projectName <- args[7]
-verbose <- args[8]
+expHeader <- toupper(args[8])
+verbose <- toupper(args[9])
 # -----------------------------------------------------------------------------
         if(verbose =="TRUE"){
             printInformationStart(args)
@@ -480,7 +481,7 @@ design <- data.frame(design, coLors)
 fileNames <- paste("expression_",design$SampleNumber,".tsv",sep="") 
 # computing of expression files in one unique file
 # count_mat <- buildCountMatrix(expressionFiles, design$Name)
-count_mat <- buildCountMatrix(fileNames, design$Name)
+count_mat <- buildCountMatrix(fileNames, design$Name, expHeader)
 
 ### plots: unpooled clustering plot, unpooled PCA plot and unpooled null counts barplot
 if(normFigTest=="TRUE")firstPlots(verbose, projectName, count_mat)

@@ -2,13 +2,11 @@
 # -*- coding: utf-8 -*-
 
 ##############################################################
-# gff to centil_gff
-#
-# Python script  for gene coverage
+# runDESeq2
 #
 # Author: Xavier Bauquet
 ##############################################################
-import os
+import os, sys
 from optparse import OptionParser
 
 parser = OptionParser()
@@ -23,39 +21,47 @@ parser.add_option("-N", "--projectName", type = "string", dest = "projectName", 
 parser.add_option("-v", "--verbose", type = "string", dest = "verbose", default = "TRUE", help ="Verbose mode\nDefault = TRUE")
 parser.add_option("-b", "--buildContrast", type = "string", dest = "buildContrast", default = "FALSE", help ="booleen TRUE/FALSE to run the building of contrast vectors\nDefault = FALSE")
 parser.add_option("-l", "--log", type = "string", dest = "log", default = "deseq2.log", help ="name of the Log file\nDefault = deseq2.log")
+parser.add_option("-e", "--expHeader", type = "string", dest = "expHeader", default = "TRUE", help ="booleen TRUE/FALSE, TRUE if expression files have a header\nDefault = TRUE")
+
 options, arguments = parser.parse_args()
 
-if options.model:
-    if options.buildContrast == "TRUE":
-        commandBuilContrast = []
-        commandBuilContrast.append("./buildContrast.R")
-        commandBuilContrast.append(options.designFile)
-        commandBuilContrast.append(options.model)
-        commandBuilContrast.append(options.comparisonFile)
-        commandBuilContrast.append(options.verbose)
-        commandBuilContrast.append("&>")
-        commandBuilContrast.append(options.log)
-        commandBuilContrast = " ".join(commandBuilContrast)
-        print("Start building of contrast vectors")
-        print str(commandBuilContrast)
-        os.system(commandBuilContrast)
-        
-    commandNormDiffana = []
-    commandNormDiffana.append("./normDiffana.R")
-    commandNormDiffana.append(options.normFig)
-    commandNormDiffana.append(options.diffana)
-    commandNormDiffana.append(options.diffanaFig)
-    commandNormDiffana.append(options.contrast)
-    commandNormDiffana.append(options.designFile)
-    commandNormDiffana.append(options.model)
-    commandNormDiffana.append(options.projectName)
-    commandNormDiffana.append(options.verbose)
-    if options.buildContrast == "TRUE":
-        commandNormDiffana.append("&>>")
-    else:
-        commandNormDiffana.append("&>")
-    commandNormDiffana.append(options.log)
-    commandNormDiffana = " ".join(commandNormDiffana)
-    print("Start normalisation and differential analysis")
-    print str(commandNormDiffana)
-    os.system(commandNormDiffana)
+##############################################################
+if not options.model:
+    # Error message if the model option is missing
+    sys.exit("Model option is missing please use -m or --model") 
+    
+command = ["/bin/bash -c '("]   
+    
+if options.buildContrast == "TRUE":
+    # build of the command for the buildContrast script running
+    commandBuilContrast = []
+    commandBuilContrast.append("./buildContrast.R")
+    commandBuilContrast.append(options.designFile)
+    commandBuilContrast.append("\""+options.model+"\"")
+    commandBuilContrast.append(options.comparisonFile)
+    commandBuilContrast.append(options.contrast)
+    commandBuilContrast.append(options.verbose)
+    commandBuilContrast = " ".join(commandBuilContrast)
+    command.append(commandBuilContrast)
+    command.append(";")
+
+# build of the command for the normDiffana script running   
+commandNormDiffana = []
+commandNormDiffana.append("./normDiffana.R")
+commandNormDiffana.append(options.normFig)
+commandNormDiffana.append(options.diffana)
+commandNormDiffana.append(options.diffanaFig)
+commandNormDiffana.append(options.contrast)
+commandNormDiffana.append(options.designFile)
+commandNormDiffana.append("\""+options.model+"\"")
+commandNormDiffana.append(options.projectName)
+commandNormDiffana.append(options.expHeader)
+commandNormDiffana.append(options.verbose)
+commandNormDiffana = " ".join(commandNormDiffana)
+command.append(commandNormDiffana)
+command.append(") &> ")
+command.append(options.log)
+command.append("'")
+command = " ".join(command)
+
+os.system(command)
