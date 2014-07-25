@@ -3,6 +3,8 @@
 ## Normalisation and Differential analysis using DESeq2 R package 
 ## for RNA sequencing analysis
 # 
+##  Version 1.2 (07/25/2014)
+#
 ## Author : Xavier Bauquet
 ###############################################################################
 # -----------------------------------------------------------------------------
@@ -44,19 +46,7 @@ buildCountMatrix <- function(files, sampleLabel,expHeader){
     colnames(countMatrix) <- sampleLabel
     return(countMatrix)
 }
-###############################################################################
-# ----------------------------------------------------------------------------
-# deleteUnexpressedGene
-# 
-# Delete genes row whithout read count in a count matrix
-#
-# Original author : Vivien DESHAIES
-# -----------------------------------------------------------------------------
-deleteUnexpressedGene <- function(countMatrix){
-    # Delete empty rows
-    countMatrix <- countMatrix[rowSums(countMatrix)>0,]
-    return(countMatrix)
-}
+
 ###############################################################################
 # -----------------------------------------------------------------------------
 # saveCountMatrix
@@ -94,7 +84,7 @@ saveCountMatrix <- function(countMatrix,fileName){
 # -----------------------------------------------------------------------------
 printInformationStart <- function(args){
     cat("\n\n########################################################\n")
-    cat("Start of the DESeq2 script version 1.0\n")
+    cat("Start of the Normalisation and Differential analysis DESeq2 script version 1.2\n")
     cat("########################################################\n\n")
     cat(format(Sys.time(), "%Y/%m/%d %H:%M:%S\n"))
     cat(R.version.string)
@@ -114,6 +104,17 @@ printInformationStart <- function(args){
     cat(paste("\nHeader on expression files                     =",toupper(args[8])))
     cat("\n\n########################\n\n")
 }
+
+###############################################################################
+# -----------------------------------------------------------------------------
+# wrapTitle
+#
+# -----------------------------------------------------------------------------
+wrapTitle <- function(title, width){
+    finalTitle <- paste(strwrap(title,width=width), sep="\n")
+    return(finalTitle)
+}
+
 ###############################################################################
 # -----------------------------------------------------------------------------
 # buildColorVector
@@ -127,8 +128,14 @@ printInformationStart <- function(args){
 # -----------------------------------------------------------------------------
 buildColorVector <- function(design){
     # for a 2 conditions analysis
-    if(length(unique(design$Condition))<= 2){
-        coLors <- c("#A6CEE3","#1F78B4")
+    if(length(unique(design$Condition))== 2){
+        uniqueColors <- c("#A6CEE3","#1F78B4")
+        test <- lapply(design$Condition ,function(x){x == unique(design$Condition)})
+        coLors <- c()
+        for (result in test){
+            coLors <- c(coLors, uniqueColors[result])
+        }
+        
     # for a 3-12 conditions analysis, using of a paired set of colors
     }else if(2 < length(unique(design$Condition)) &&  length(unique(design$Condition))<= 12){
         # download of the "Paired" set of colors from the RColorBrewer library
@@ -166,17 +173,17 @@ buildColorVector <- function(design){
 # -----------------------------------------------------------------------------
 firstPlots <- function(verbose, projectName, count_mat){
     if(verbose=="TRUE")cat("      Fig 1 - Unpooled clustering\n") 
-    png(paste("unpooled_clustering-", projectName,".png", sep=""),width=1000, height=600)
+    png(paste(projectName,"-normalisation_unpooled_clustering.png", sep=""),width=1000, height=600)
         # calculation of the dispersion
-        dist.mat <- dist(1 - cor(count_mat)/2)
-        plot(hclust(dist.mat), main=paste("non_pooled cluster dendrogram - ", projectName, sep=""), xlab="")
+        dist.mat <- dist(t(count_mat))
+        plot(hclust(dist.mat), main=paste("Unpooled cluster dendrogram - ", projectName, sep=""), xlab="")
     dev.off()
     
     if(verbose=="TRUE")cat("      Fig 2 - Unpooled PCA\n") 
     pcaCount <- PCA(t(count_mat), graph=FALSE)
-    png(paste("PCA - ",projectName,".png",sep=""),width=1000, height=600)
+    png(paste(projectName,"-normalisation_unpooled_PCA.png",sep=""),width=1000, height=600)
         par(mar=c(5,5,5,20))
-        plot.PCA(pcaCount, choix="ind", col.ind=as.character(design$coLors), title = paste("PCA ", projectName, sep=""))
+        plot.PCA(pcaCount, choix="ind", col.ind=as.character(design$coLors), title = paste("Unpooled PCA - ", projectName, sep=""))
         cor<-par('usr')
         par(xpd=NA)
         # add of legends
@@ -184,7 +191,7 @@ firstPlots <- function(verbose, projectName, count_mat){
     dev.off()
  
     if(verbose=="TRUE")cat("      Fig 3 - Null counts barplot\n") 
-    png(paste("Null_counts-", projectName,".png"),width=1000, height=600)
+    png(paste(projectName,"-normalisation_null_counts.png",sep=""),width=1000, height=600)
         par(mar=c(15,8,5,20))
         barplot(100*colMeans(count_mat==0), cex.lab=2, las=3, col=as.character(design$coLors) ,main=paste("Proportion of null counts per sample -", projectName, sep=" "), ylab="Proportion of null counts (%)")
         cor<-par('usr')
@@ -209,9 +216,9 @@ firstPlots <- function(verbose, projectName, count_mat){
 # -----------------------------------------------------------------------------
 secondPlots <- function(verbose, projectName, dds){
     if(verbose=="TRUE")cat("      Fig 4 - Unpooled counts barplot\n") 
-    png(paste("barplot_counts-", projectName,".png", sep=""),width=1000, height=600)
+    png(paste(projectName,"-normalisation_barplot_counts.png", sep=""),width=1000, height=600)
         par(mar=c(15,8,5,20))
-        barplot(colSums(counts(dds)), main=paste("Read counts - ", projectName, sep=""), col=as.character(colData(dds)$coLors), names.arg =colData(dds)$Name,cex.lab=2, las=3, ylab="Total expression counts")
+        barplot(colSums(counts(dds)), main=paste("Read counts - ", projectName, sep=""), col=as.character(colData(dds)$coLors), names.arg =colData(dds)$Name,cex.lab=2, las=3, ylab="Total read counts")
         cor<-par('usr')
         par(xpd=NA)
         # add legends
@@ -219,7 +226,7 @@ secondPlots <- function(verbose, projectName, dds){
     dev.off()
 
     if(verbose=="TRUE")cat("      Fig 5 - Unpooled counts boxplot\n") 
-    png(paste("boxplot_count-",projectName,".png", sep=""),width=1000, height=600)
+    png(paste(projectName,"-normalisation_boxplot_count.png", sep=""),width=1000, height=600)
         par(mar=c(15,8,5,20))
         boxplot(log2(counts(dds)+1),main=paste("Count distribution - ", projectName, sep=""), col=as.character(colData(dds)$coLors), names =colData(dds)$Name,cex.lab=2, las=3, ylab="log2 (counts+1)")
         cor<-par('usr')
@@ -243,9 +250,9 @@ secondPlots <- function(verbose, projectName, dds){
 pooledPlots <- function(verbose, projectName, dds){
 
     if(verbose=="TRUE")cat("      Fig 6 - Pooled counts barplot\n") 
-    png(paste("barplot_counts_pooled-", projectName,".png", sep=""),width=1000, height=600)
+    png(paste(projectName,"-normalisation_barplot_counts_pooled.png", sep=""),width=1000, height=600)
         par(mar=c(15,8,5,20))
-        barplot(colSums(counts(dds)), main=paste("Pooled expression counts - ", projectName, sep=""), col=as.character(colData(dds)$coLors), names.arg =colData(dds)$Name,cex.lab=2, las=3, ylab="Total expression counts")
+        barplot(colSums(counts(dds)), main=paste("Pooled read counts - ", projectName, sep=""), col=as.character(colData(dds)$coLors), names.arg =colData(dds)$Name,cex.lab=2, las=3, ylab="Total read counts")
         cor<-par('usr')
         par(xpd=NA)
         # add legends
@@ -253,7 +260,7 @@ pooledPlots <- function(verbose, projectName, dds){
     dev.off()
 
     if(verbose=="TRUE")cat("      Fig 7 - Pooled counts boxplot\n") 
-    png(paste("boxplot_count_pooled", projectName,".png", sep=""),width=1000, height=600)
+    png(paste(projectName,"-normalisation_boxplot_count_pooled.png", sep=""),width=1000, height=600)
         par(mar=c(15,8,5,20))
         boxplot(log2(counts(dds)+1),main=paste("Pooled count distribution - ", projectName, sep=""), col=as.character(colData(dds)$coLors), names =colData(dds)$Name,cex.lab=2, las=3, ylab="log2 (counts+1)")
         cor<-par('usr')
@@ -279,18 +286,18 @@ pooledPlots <- function(verbose, projectName, dds){
 normPlots <- function(verbose, projectName, dds){
 
     if(verbose=="TRUE")cat("      Fig 8 - Pooled and Normalised clustering\n") 
-    png(paste("pooled_clustering-",projectName,".png", sep=""),width=1000, height=600)
+    png(paste(projectName,"-normalisation_pooled_clustering.png", sep=""),width=1000, height=600)
         # calculation of the dispertion 
         ddsStabilized <- assay(varianceStabilizingTransformation(dds))
-        dist.mat <- dist(1 - cor(ddsStabilized)/2)
+        dist.mat <- dist(t(ddsStabilized))
         plot(hclust(dist.mat), main=paste("Pooled and Normalised cluster dendrogram - ", projectName, sep=""), xlab="")
     dev.off()
 
     if(verbose=="TRUE")cat("      Fig 9 - Pooled and Normalised PCA\n") 
     pcaCount <- PCA(t(counts(dds, normalized=TRUE)), graph=FALSE)
-    png(paste("normalised_PCA - ",projectName,".png",sep=""),width=1000, height=600)
+    png(paste(projectName,"-normalisation_normalised_PCA.png",sep=""),width=1000, height=600)
         par(mar=c(5,5,5,20))
-        plot.PCA(pcaCount, choix="ind", col.ind=as.character(colData(dds)$coLors), title = paste("Pooled and normalised PCA ", projectName, sep=""))
+        plot.PCA(pcaCount, choix="ind", col.ind=as.character(colData(dds)$coLors), title = paste("Pooled and normalised PCA - ", projectName, sep=""))
         cor<-par('usr')
         par(xpd=NA)
         # add legends
@@ -298,7 +305,7 @@ normPlots <- function(verbose, projectName, dds){
     dev.off()
         
     if(verbose=="TRUE")cat("      Fig 10 - Pooled and Normalised boxplot\n") 
-    png(paste("normalised_boxplot_count-",projectName,".png",sep=""),width=1000, height=600)
+    png(paste(projectName,"-normalisation_normalised_boxplot_count.png",sep=""),width=1000, height=600)
         par(mar=c(15,8,5,20))
         boxplot(log2(counts(dds,normalized=TRUE)+1),main=paste("Pooled and Normalised count distribution - ", projectName, sep=""), col=as.character(colData(dds)$coLors), names =colData(dds)$Name,cex.lab=2, las=3, ylab="log2 (counts+1)")
         cor<-par('usr')
@@ -307,7 +314,7 @@ normPlots <- function(verbose, projectName, dds){
         legend(cor[2]*1.01,cor[4], title="Legend", legend=unique(colData(dds)$Condition), col=unique(as.character(colData(dds)$coLors)), pch=15, pt.cex=3, cex=1.2)
     dev.off()
         
-    if(verbose=="TRUE")cat("      Fig 11 - Most expressed sequence plot\n") 
+    if(verbose=="TRUE")cat("      Fig 11 - Most expressed features plot\n") 
     # preparation of 2 data frame with the same number of column than the dds count matrix 
     maxCounts <- counts(dds)[1,]
     transcriptNames <- counts(dds)[1,]
@@ -315,14 +322,14 @@ normPlots <- function(verbose, projectName, dds){
     for(i in 1:ncol(counts(dds))){
         # selection of the maximum number of count
         maxCounts[i] <- (max(counts(dds, normalized=TRUE)[,i])/sum(counts(dds, normalized=TRUE)[,i]))*100
-        # selection of the name of the gene/transcript this the maximum of count
+        # selection of the name of the features this the maximum of count
         transcriptNames[i] <- row.names(subset(counts(dds, normalized=TRUE), counts(dds, normalized=TRUE)[,i]==max(counts(dds, normalized=TRUE)[,i])))
     }
-    png(paste("most_expressed_sequence-",projectName,".png",sep=""),width=1000, height=600)
-        par(mar=c(15,8,5,20))
-        x <- barplot(maxCounts, main=paste("Most expressed sequences - ", projectName, sep=""), col=as.character(colData(dds)$coLors), names.arg =colData(dds)$Name,cex.lab=2, las=3, ylab="Proportion of reads (%)")
-        # add names of the gene/transcript on the plot bars
-        text(x, 0, labels= transcriptNames, srt=90, adj=0)
+    png(paste(projectName,"-normalisation_most_expressed_features.png",sep=""),width=1000, height=600)
+        par(mar=c(5,15,5,20))
+        x <- barplot(maxCounts, main=paste("Most expressed features - ", projectName, sep=""), col=as.character(colData(dds)$coLors),horiz = TRUE, names.arg =colData(dds)$Name,las=1,cex.lab=2, xlab="Proportion of reads (%)")
+        # add names of the features on the plot bars
+        text(0, x, labels= transcriptNames, srt=0, adj=0)
         cor<-par('usr')
         par(xpd=NA)
         # add legends
@@ -350,8 +357,9 @@ anadiff <- function(dds, condition1, condition2, param, projectName){
     # selection of results of the comparison
     res <- results(dds, contrast=c("Condition", condition1, condition2))
     # function for plots
-    if(param=="TRUE")anadiffPlots(paste(condition1,"_vs_", condition2,sep=""), projectName,res)
-    saveCountMatrix(as.data.frame(res),paste("diffana_",condition1,"_vs_",condition2,"-",projectName,".tsv", sep=""))
+    if(param=="TRUE")anadiffPlots(paste(condition1,"_vs_", condition2,sep=""),projectName,res)
+    saveCountMatrix(as.data.frame(res),paste(projectName,"-diffana_",condition1,"_vs_",condition2,".tsv", sep=""))
+    cat(paste("Comparison: ",paste(condition1,"_vs_", condition2,sep="")," finish\n", sep=""))
 }
 ###############################################################################
 # -----------------------------------------------------------------------------
@@ -361,6 +369,7 @@ anadiff <- function(dds, condition1, condition2, param, projectName){
 #
 #   input: dds -> DESeq object
 #          nameContrastVec -> character (name of the contrast vector)
+#          vsContrastVec -> character (comparison name of the contrast vector)
 #          contrastVec -> vector (the contrast vector)
 #          param -> booleen (FALSE to escape plots)
 #          projectName -> character (name of the project)
@@ -369,17 +378,17 @@ anadiff <- function(dds, condition1, condition2, param, projectName){
 #               the differential analysis between both conditions)
 # 
 # -----------------------------------------------------------------------------
-contrastAnadiff <- function(dds, nameContrastVec, contrastVec, param, projectName){
+contrastAnadiff <- function(dds, nameContrastVec,vsContrastVec, contrastVec, param, projectName){
     # separation of the character string in a vector
     contrastVec <- unlist(strsplit(substr(contrastVec, 2, (nchar(contrastVec)-1)), ","))
     # selection of results with the contrast vector
     res <- results(dds, contrast= as.numeric(contrastVec))
     # change the % in the name in -
-    nameContrastVec <- gsub("%","-",nameContrastVec)
+    vsContrastVec <- gsub("%","-",vsContrastVec)
     # function for plots
     if(param=="TRUE")anadiffPlots(nameContrastVec, projectName,res)   
-    saveCountMatrix(as.data.frame(res),paste("diffana_",nameContrastVec,"-",projectName,".tsv", sep=""))
-    cat(paste("Comparison: ",nameContrastVec," finish\n", sep=""))
+    saveCountMatrix(as.data.frame(res),paste(projectName,"-diffana_",nameContrastVec,".tsv", sep=""))
+    cat(paste("Comparison: ",vsContrastVec," finish\n", sep=""))
 }
 ###############################################################################
 # -----------------------------------------------------------------------------
@@ -389,7 +398,8 @@ contrastAnadiff <- function(dds, nameContrastVec, contrastVec, param, projectNam
 #   (anadiff and contrastAnadiff): p-value plot, adjusted p-value plot, MA-plot
 #   and differentially expressed gense according adjusted P-value plot
 #
-#   input: condName -> character (name of the comparison or of the contrast vector)
+#   input: smallNames -> character (
+#          condName -> character (name of the comparison or of the contrast vector)
 #          projectName -> character (name of the project)
 #          res -> DESeq object (results of the differential analysis)
 #   output: 4 plots -> png
@@ -397,29 +407,34 @@ contrastAnadiff <- function(dds, nameContrastVec, contrastVec, param, projectNam
 # -----------------------------------------------------------------------------
 anadiffPlots <- function(condName, projectName,res){
     # Raw Pvalue plot
-    png(paste("diffana_plot_pvalue_",condName,"-",projectName,".png",sep=""),width=1000, height=600)
-        hist(res$pvalue,main=paste("Raw P-value plot - ", projectName,sep=""), col="#1F78B4")
+    png(paste(projectName,"-diffana_plot_pvalue_",condName,".png",sep=""),width=1000, height=600)
+        title <- paste("Raw P-value plot ",condName," - ", projectName,sep="")
+        hist(res$pvalue,main=wrapTitle(title,120), col="#1F78B4", xlab="p-value")
     dev.off()
     # Adjusted Pvalue plot
-    png(paste("diffana_plot_padj_",condName,"-",projectName,".png",sep=""),width=1000, height=600)
-        hist(res$padj,main=paste("Adjusted P-value plot - ", projectName,sep=""), col="#FF7F00")
+    png(paste(projectName,"-diffana_plot_padj_",condName,".png",sep=""),width=1000, height=600)
+        title <- paste("Adjusted P-value plot ",condName," - ", projectName,sep="")
+        hist(res$padj,main=wrapTitle(title,120), col="#FF7F00", xlab="Adjusted p-value")
     dev.off()
     # MA-plot      
-    png(paste("diffana_MA_plot_",condName,"-",projectName,".png",sep=""),width=1000, height=600) 
-        plotMA(res, alpha=0.05, ylim=c(-10,10), main= paste("MA-plot of ",condName," - ", projectName,sep=""))
+    png(paste(projectName,"-diffana_MA_plot_",condName,".png",sep=""),width=1000, height=600) 
+        title <- paste("MA-plot of ",condName," - ", projectName,sep="")
+        plotMA(res, alpha=0.05, ylim=c(-10,10), main= wrapTitle(title,120))
+        legend("bottomright", legend=c("adjusted p-value < 0.05", "adjusted p-value >= 0.05"), fill=c("red3","gray0"))
     dev.off()
-    # Number of differentially expressed genes according to padj
+    # Number of differentially expressed features according to padj
     # adjusted p-value to plot
     p <- c(0.000001, 0.00001, 0.0001, 0.001, 0.01, 0.05)
     value <- c(0,0,0,0,0,0)
-    # calculation of the number of genes/transcript differentially expressed for each adjusted p-value
+    # calculation of the number of features differentially expressed for each adjusted p-value
     for(i in 1:length(p)){
         value[i] <- nrow(subset(res, res$padj < p[i]))
     }
-    png(paste("diffana_plot_differentially_expressed_genes_",condName,"-",projectName,".png",sep=""),width=600, height=600) 
+    png(paste(projectName,"-diffana_plot_differentially_expressed_features_",condName,".png",sep=""),width=600, height=600) 
         par(mar=c(8,8,5,5))
-        x <- barplot(value, main=paste("Differentially expressed genes according adjusted P-value - ", projectName,sep=""), col="tan", names.arg =as.character(p),cex.lab=2, ylab="Number of genes differentially expressed")
-        # add of the number of genes differentially expressed on the plot bars
+        title <- paste("Differentially expressed features according adjusted P-value ",condName," - ", projectName,sep="")
+        x <- barplot(value, main=wrapTitle(title,60), col="tan", names.arg =as.character(p),cex.lab=2, ylab="Number of features differentially expressed")
+        # add of the number of features differentially expressed on the plot bars
         text(x, 0, labels= value, srt=90, adj=0)
         cor<-par('usr')
         par(xpd=NA)
@@ -478,19 +493,14 @@ coLors <- buildColorVector(design)
 design <- data.frame(design, coLors)
 
         if(verbose=="TRUE")cat("3 - Count matrix building\n") 
-fileNames <- paste("expression_",design$SampleNumber,".tsv",sep="") 
 # computing of expression files in one unique file
-# count_mat <- buildCountMatrix(expressionFiles, design$Name)
-count_mat <- buildCountMatrix(fileNames, design$Name, expHeader)
+count_mat <- buildCountMatrix(design$expressionFiles, design$Name, expHeader)
 
 ### plots: unpooled clustering plot, unpooled PCA plot and unpooled null counts barplot
 if(normFigTest=="TRUE")firstPlots(verbose, projectName, count_mat)
 ###
 
-        if(verbose=="TRUE")cat("4 - Unexpressed gene deletion\n") 
-count_mat <- deleteUnexpressedGene(count_mat)
-
-        if(verbose=="TRUE")cat("5 - DESeq2 object building\n")
+        if(verbose=="TRUE")cat("4 - DESeq2 object building\n")
 # creation of the DESeq object including the count matrix and the design file
 dds <- DESeqDataSetFromMatrix(countData=count_mat, colData=design, design=as.formula(deseqModel))
 
@@ -498,38 +508,38 @@ dds <- DESeqDataSetFromMatrix(countData=count_mat, colData=design, design=as.for
 if(normFigTest=="TRUE")secondPlots(verbose, projectName, dds)
 ###
 
-        if(verbose=="TRUE")cat("6 - Saving of rawCountMatrix\n")
-saveCountMatrix(counts(dds),paste("diffana_", projectName,"_rawCountMatrix.tsv", sep=""))
+        if(verbose=="TRUE")cat("5 - Saving of rawCountMatrix\n")
+saveCountMatrix(counts(dds),paste(projectName,"-normalisation_rawCountMatrix.tsv", sep=""))
 
 # -----------------------------------------------------------------------------
 #
 #   Collapsing technical replicates
 #
 # -----------------------------------------------------------------------------
-        if(verbose=="TRUE")cat("7 - Collapsing of technical replicas\n") 
+        if(verbose=="TRUE")cat("6 - Collapsing of technical replicates\n") 
 dds <- collapseReplicates(dds, groupby=dds$RepTechGroup)
 
 ### plots: pooled counts barplot and pooled counts boxplot
 if(normFigTest=="TRUE")pooledPlots(verbose, projectName, dds)
 ###
 
-        if(verbose=="TRUE")cat("8 - Saving of rawPooledCountMatrix\n")
-saveCountMatrix(counts(dds),paste("diffana_", projectName, "_rawPooledCountMatrix.tsv", sep=""))
+        if(verbose=="TRUE")cat("7 - Saving of rawPooledCountMatrix\n")
+saveCountMatrix(counts(dds),paste(projectName,"-normalisation_rawPooledCountMatrix.tsv", sep=""))
 
 # -----------------------------------------------------------------------------
 #
 #   Normalisation
 #
 # -----------------------------------------------------------------------------
-        if(verbose=="TRUE")cat("9 - Normalisation\n")
+        if(verbose=="TRUE")cat("8 - Normalisation\n")
 dds <- estimateSizeFactors(dds)
 
 ### plots: pooled and normalised clustering, pooled and normalised PCA, pooled and normalised boxplot and most expressed sequence plot
 if(normFigTest=="TRUE")normPlots(verbose, projectName, dds)
 ###
 
-        if(verbose=="TRUE")cat("10 - Saving of normalisedCountMatrix\n")
-saveCountMatrix(counts(dds,normalized=TRUE),paste("diffana_", projectName,"_normalisedCountMatrix.tsv", sep=""))
+        if(verbose=="TRUE")cat("9 - Saving of normalisedCountMatrix\n")
+saveCountMatrix(counts(dds,normalized=TRUE),paste(projectName,"-normalisation_normalisedCountMatrix.tsv", sep=""))
 
 # -----------------------------------------------------------------------------
 #
@@ -538,34 +548,35 @@ saveCountMatrix(counts(dds,normalized=TRUE),paste("diffana_", projectName,"_norm
 # -----------------------------------------------------------------------------
 
 if(diffanaTest=="TRUE"){
-        if(verbose=="TRUE")cat("11 - Dispersion estimations\n")
+        if(verbose=="TRUE")cat("10 - Dispersion estimations\n")
     dds <- estimateDispersions(dds)
     if(diffanaFigTest=="TRUE"){
         if(verbose=="TRUE")cat("      Fig 12 - Dispersion plot\n") 
-        png("plot_disp.png",width=1000, height=600)
-            plotDispEsts(dds)
+        png(paste(projectName,"-diffana_plot_disp.png",sep=""),width=1000, height=600)
+            plotDispEsts(dds, main=paste("Dispersion estimation scatter plot - ", projectName, sep=""))
         dev.off()
     }
     # if differential analysis using contrast matrix
     if(contrastTest != "FALSE"){
-        if(verbose=="TRUE")cat("12 - Differential analysis using contrast matrix\n")
+        if(verbose=="TRUE")cat("11 - Differential analysis using contrast matrix\n")
         # statistical analysis
         dds <- nbinomWaldTest(dds, modelMatrixType="expanded")
         contrastMatrix <- read.table(contrastTest, sep="\t", header=T, dec=".", stringsAsFactors=F)
         for(i in 1:nrow(contrastMatrix)){
-            contrastAnadiff(dds, contrastMatrix[i,1],contrastMatrix[i,2], diffanaFigTest, projectName)
+            contrastAnadiff(dds,contrastMatrix[i,1],contrastMatrix[i,2],contrastMatrix[i,3], diffanaFigTest, projectName)
         }
         
     }else{    
         # statistical analysis
         dds <- DESeq(dds)
         # selection of the reference condition
-        TrueRef <- subset(design, Reference %in% "true")
+        design$Reference <- toupper(design$Reference)
+        TrueRef <- subset(design, Reference %in% "TRUE")
         # selection of conditions
         unique_condition <- unique(design$Condition)
         # if no reference condition
         if(nrow(TrueRef)<1){
-            if(verbose=="TRUE")cat("12 - Differential analysis without contrast matrix and without reference condition\n")        
+            if(verbose=="TRUE")cat("11 - Differential analysis without contrast matrix and without reference condition\n")        
             for(i in 1:(length(unique_condition)-1)){
                 for(j in (i+1):length(unique_condition)){
                     if(unique_condition[i] != unique_condition[j]){
@@ -575,7 +586,7 @@ if(diffanaTest=="TRUE"){
             }
         # if reference condition
         }else{
-            if(verbose=="TRUE")cat("12 - Differential analysis without contrast matrix and with reference condition\n") 
+            if(verbose=="TRUE")cat("11 - Differential analysis without contrast matrix and with reference condition\n") 
             for(i in 1:length(unique_condition)){
                 if(unique_condition[i] != TrueRef$Condition[1]){
                     anadiff(dds, TrueRef$Condition[1], unique_condition[i], diffanaFigTest, projectName) 

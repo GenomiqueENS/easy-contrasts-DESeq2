@@ -4,64 +4,104 @@
 ##############################################################
 # runDESeq2
 #
+# Script to run and formatte options for both scripts 
+# buildContrast.R and normDiffana.R
+# 
+# Version 1.2 (07/25/2014)
+#
 # Author: Xavier Bauquet
 ##############################################################
 import os, sys
-from optparse import OptionParser
+from optparse import OptionParser, OptionGroup
+usage = "usage: %prog [options] arg1 arg2"
 
 parser = OptionParser()
-parser.add_option("-n", "--normFig", type = "string", dest = "normFig", default = "TRUE", help ="booleen TRUE/FALSE to escape or not figures from the normalisation part\nDefault = TRUE")
-parser.add_option("-D", "--diffana", type = "string", dest = "diffana", default = "TRUE", help ="booleen TRUE/FALSE to escape or not the differential analysis\nDefault = TRUE")
-parser.add_option("-d", "--diffanaFig", type = "string", dest = "diffanaFig", default = "TRUE", help ="booleen TRUE/FALSE to escape or not figures from the differential analysis\nDefault = TRUE")
-parser.add_option("-c", "--contrast", type = "string", dest = "contrast", default = "FALSE", help ="Name of the file including contrats vector for the differential analysis, if FALSE the differential analysis will be performed without contrast vectors, comparing all samples each other or to the reference sample\nDefault = FALSE")
-parser.add_option("-f", "--designFile", type = "string", dest = "designFile", default = "design.txt", help ="Name of the design file\nDefault = design.txt")
-parser.add_option("-m", "--model", type = "string", dest = "model", help ="The DESeq2 model to be used for the differential analysis\nas a formula: ~condition1+condition2+condition1:condition2 for more information about the formula please refer to the DESeq2 documentation http://www.bioconductor.org/packages/release/bioc/html/DESeq2.html")
-parser.add_option("-C", "--comparisonFile", type = "string", dest = "comparisonFile", default = "comparisonFile.txt", help ="Name of the file including the comparison to be compute in contrast vector.\nComparisons must have this form: condition1%condition2_vs_condition3%condition4 where the % mean interaction between conditions and _vs_ mean a comparison between interactions\nDefault = comparisonFile.txt")
-parser.add_option("-N", "--projectName", type = "string", dest = "projectName", default = "exp1", help ="Name of the project\nDefault = exp1")
 parser.add_option("-v", "--verbose", type = "string", dest = "verbose", default = "TRUE", help ="Verbose mode\nDefault = TRUE")
-parser.add_option("-b", "--buildContrast", type = "string", dest = "buildContrast", default = "FALSE", help ="booleen TRUE/FALSE to run the building of contrast vectors\nDefault = FALSE")
-parser.add_option("-l", "--log", type = "string", dest = "log", default = "deseq2.log", help ="name of the Log file\nDefault = deseq2.log")
-parser.add_option("-e", "--expHeader", type = "string", dest = "expHeader", default = "TRUE", help ="booleen TRUE/FALSE, TRUE if expression files have a header\nDefault = TRUE")
+
+group = OptionGroup(parser, "Compulsory option")
+group.add_option("-m", "--model", type = "string", dest = "model", help ="The DESeq2 model to be used for the differential analysis\nas a formula: ~condition1+condition2+condition1:condition2 for more information about the formula please refer to the DESeq2 documentation http://www.bioconductor.org/packages/release/bioc/html/DESeq2.html")
+parser.add_option_group(group)
+group = OptionGroup(parser, "Option for analysis with contrast vectors:")
+group.add_option("-c", "--contrast", type = "string", dest = "contrast", default = "FALSE", help ="booleen TRUE/FALSE to escape or not the use of contrast vectors for differential anlysis\nDefault = FALSE")
+group.add_option("-b", "--buildContrast", type = "string", dest = "buildContrast", default = "FALSE", help ="booleen TRUE/FALSE to escape or not the building of contrast vectors\nDefault = FALSE")
+parser.add_option_group(group)
+group = OptionGroup(parser, "Files options")
+group.add_option("-f", "--designFile", type = "string", dest = "designFile", default = "deseqDesign.txt", help ="Name of the design file\nDefault = deseqDesign.txt")
+group.add_option("-C", "--comparisonFile", type = "string", dest = "comparisonFile", default = "comparisonFile.txt", help ="Name of the file including the comparison to be compute in contrast vector.\nComparisons must have this form: condition1%condition2_vs_condition3%condition4 where the % mean interaction between conditions and _vs_ mean a comparison between interactions\nDefault = comparisonFile.txt")
+
+parser.add_option_group(group)
+group = OptionGroup(parser, "Other options")
+group.add_option("-n", "--normFig", type = "string", dest = "normFig", default = "TRUE", help ="booleen TRUE/FALSE to escape or not figures from the normalisation part\nDefault = TRUE")
+group.add_option("-D", "--diffana", type = "string", dest = "diffana", default = "TRUE", help ="booleen TRUE/FALSE to escape or not the differential analysis\nDefault = TRUE")
+group.add_option("-d", "--diffanaFig", type = "string", dest = "diffanaFig", default = "TRUE", help ="booleen TRUE/FALSE to escape or not figures from the differential analysis\nDefault = TRUE")
+group.add_option("-p", "--projectName", type = "string", dest = "projectName", default = "exp1", help ="Name of the project\nDefault = exp1")
+group.add_option("-H", "--expHeader", type = "string", dest = "expHeader", default = "TRUE", help ="booleen TRUE/FALSE, TRUE if expression files have a header\nDefault = TRUE")
+group.add_option("-N", "--normDiffana", type = "string", dest = "normDiffana", default = "TRUE", help ="booleen TRUE/FALSE, FALSE to escape the normalisation and differential analysis steps\nDefault = TRUE")
+parser.add_option_group(group)
 
 options, arguments = parser.parse_args()
 
 ##############################################################
+# Error messages
+if options.verbose.upper() != "TRUE" and options.verbose.upper() != "FALSE":
+    sys.exit("error: -v --verbose option only accepts 2 values TRUE or FALSE. Please use the -h option and refer to the help section")  
+###
 if not options.model:
-    # Error message if the model option is missing
     sys.exit("Model option is missing please use -m or --model") 
+###    
+if options.contrast.upper() != "TRUE" and options.contrast.upper() != "FALSE":
+   sys.exit("error: -c --contrast option only accepts 2 values TRUE or FALSE. Please use the -h option and refer to the help section")
+if options.buildContrast.upper() != "TRUE" and options.buildContrast.upper() != "FALSE":
+   sys.exit("error: -b --buildContrast option only accepts 2 values TRUE or FALSE. Please use the -h option and refer to the help section") 
+###   
+if options.normFig.upper() != "TRUE" and options.normFig.upper() != "FALSE":
+    sys.exit("error: -n --normFig option only accepts 2 values TRUE or FALSE. Please use the -h option and refer to the help section")
+if options.diffana.upper() != "TRUE" and options.diffana.upper() != "FALSE":
+    sys.exit("error: -D --diffana option only accepts 2 values TRUE or FALSE. Please use the -h option and refer to the help section")
+if options.diffanaFig.upper() != "TRUE" and options.diffanaFig.upper() != "FALSE":
+    sys.exit("error: -d --diffanaFig option only accepts 2 values TRUE or FALSE. Please use the -h option and refer to the help section")
+if options.expHeader.upper() != "TRUE" and options.expHeader.upper() != "FALSE":
+    sys.exit("error: -H --expHeader option only accepts 2 values TRUE or FALSE. Please use the -h option and refer to the help section")
+if options.normDiffana.upper() != "TRUE" and options.normDiffana.upper() != "FALSE":
+    sys.exit("error: -N --normDiffana option only accepts 2 values TRUE or FALSE. Please use the -h option and refer to the help section")
     
+##############################################################   
 command = ["/bin/bash -c '("]   
     
-if options.buildContrast == "TRUE":
+if options.buildContrast.upper() == "TRUE":
     # build of the command for the buildContrast script running
     commandBuilContrast = []
     commandBuilContrast.append("./buildContrast.R")
     commandBuilContrast.append(options.designFile)
     commandBuilContrast.append("\""+options.model+"\"")
     commandBuilContrast.append(options.comparisonFile)
-    commandBuilContrast.append(options.contrast)
+    commandBuilContrast.append("{0}-contrastFile.tsv".format(options.projectName))
     commandBuilContrast.append(options.verbose)
     commandBuilContrast = " ".join(commandBuilContrast)
     command.append(commandBuilContrast)
     command.append(";")
-
-# build of the command for the normDiffana script running   
-commandNormDiffana = []
-commandNormDiffana.append("./normDiffana.R")
-commandNormDiffana.append(options.normFig)
-commandNormDiffana.append(options.diffana)
-commandNormDiffana.append(options.diffanaFig)
-commandNormDiffana.append(options.contrast)
-commandNormDiffana.append(options.designFile)
-commandNormDiffana.append("\""+options.model+"\"")
-commandNormDiffana.append(options.projectName)
-commandNormDiffana.append(options.expHeader)
-commandNormDiffana.append(options.verbose)
-commandNormDiffana = " ".join(commandNormDiffana)
-command.append(commandNormDiffana)
-command.append(") &> ")
-command.append(options.log)
-command.append("'")
-command = " ".join(command)
+        
+if options.normDiffana.upper() == "TRUE":
+    # build of the command for the normDiffana script running   
+    commandNormDiffana = []
+    commandNormDiffana.append("./normDiffana.R")
+    commandNormDiffana.append(options.normFig)
+    commandNormDiffana.append(options.diffana)
+    commandNormDiffana.append(options.diffanaFig)
+    if options.contrast.upper() == "TRUE":
+        commandNormDiffana.append("{0}-contrastFile.tsv".format(options.projectName))
+    else:
+        commandNormDiffana.append(options.contrast.upper())
+    commandNormDiffana.append(options.designFile)
+    commandNormDiffana.append("\""+options.model+"\"")
+    commandNormDiffana.append(options.projectName)
+    commandNormDiffana.append(options.expHeader)
+    commandNormDiffana.append(options.verbose)
+    commandNormDiffana = " ".join(commandNormDiffana)
+    command.append(commandNormDiffana)
+    command.append(") &> ")
+    command.append("{0}-deseq2.log".format(options.projectName))
+    command.append("'")
+    command = " ".join(command)
 
 os.system(command)
