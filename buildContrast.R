@@ -19,9 +19,8 @@ designPath <- args[1]
 deseqModel <- args[2]
 comparisonPath <- args[3]
 contrastFile <- args[4]
-verbose <- toupper(args[5])
 
-if(verbose=="TRUE"){            
+         
     # Print date, hours, packages version and parameters for log file 
     cat("\n\n########################################################\n")
     cat("Start of the DESeq2 contrast matrix generator script version 1.2\n")
@@ -38,17 +37,17 @@ if(verbose=="TRUE"){
     cat(paste("\nDESeq2 modele            =", args[2]))
     cat(paste("\nComparison file          =", args[3]))
     cat("\n\n########################\n\n")
-}            
+         
 # Loading of DESeq2 library
 library(DESeq2)                
 # -----------------------------------------------------------------------------                
-    if(verbose=="TRUE")cat("\n\n########################\n")
-    if(verbose=="TRUE")cat("1 - Read design file\n") 
+    cat("\n\n########################\n")
+    cat("1 - Read design file\n") 
 # Loading of the design file
 target <- read.table(designPath, sep="\t", header=T, dec=".", stringsAsFactors=F)
 
 # -----------------------------------------------------------------------------
-    if(verbose=="TRUE")cat("2 - Artificial count matrix building\n")
+    cat("2 - Artificial count matrix building\n")
 # Creation of the random count matrix for running the DESeq2 minimal script to pick up the B factors
 forCounts <- rep(1, (nrow(target)*3))
 for (i in 1:(nrow(target)*3)){
@@ -57,7 +56,7 @@ for (i in 1:(nrow(target)*3)){
 counts <- matrix(data=forCounts, nrow=3)
 
 # -----------------------------------------------------------------------------
-    if(verbose=="TRUE")cat("3 - DESeq2 function runing for B factors names\n") 
+    cat("3 - DESeq2 function runing for B factors names\n") 
 # DESeq2 minimal script for pick up the B factors                
 dds <- DESeqDataSetFromMatrix(countData=counts, colData=target, design=as.formula(deseqModel))
 dds <- estimateSizeFactors(dds)
@@ -66,16 +65,16 @@ dds <- nbinomWaldTest(dds, modelMatrixType="expanded")
 # B factors 
 Bfactors <- resultsNames(dds)
 
-if(verbose=="TRUE"){
+
     cat("\n###############################################################################\n")
     cat("Beta factors:\n")
     print(Bfactors)
     cat("\n###############################################################################\n\n")
-}
+
 # Zero vector of the length of Bfactors-1 (- the Intercept factor) that will be used in column for the construction of the factorData
 B <- rep(0, (length(Bfactors)-1))
 # -----------------------------------------------------------------------------
-    if(verbose=="TRUE")cat("3 - DESeq2 function runing for B factors names\n") 
+    cat("3 - DESeq2 function runing for B factors names\n") 
 # Creation of the model matrix for each condition
 factorData <- data.frame(condition= Bfactors[2:length(Bfactors)])
 for(i in 1:length(Bfactors)){
@@ -90,12 +89,12 @@ contrastData <- factorData[1,]
 names(contrastData)[1] <- "comparison"
 
 # -----------------------------------------------------------------------------                
-    if(verbose=="TRUE")cat("4 - Read comparison file\n") 
+    cat("4 - Read comparison file\n") 
 # Loading of the comparison file
 comparisonRow <- read.table(comparisonPath, sep="\t", header=F, dec=".", stringsAsFactors=F)
 
 # -----------------------------------------------------------------------------
-    if(verbose=="TRUE")cat("5 - Addition of model matrix for each condition of the interaction\n")
+    cat("5 - Addition of model matrix for each condition of the interaction\n")
 # For each row of the comparison file (for each comparison)
 for(x in 1:nrow(comparisonRow)){
     # Separation of the comparison formula by the "_vs_" to obtain a vector including all %-interaction to compare
@@ -159,7 +158,7 @@ for(x in 1:nrow(comparisonRow)){
     }
     
 # -----------------------------------------------------------------------------                
-    if(verbose=="TRUE")cat("6 - Substraction of matrix for _vs_ comparison\n")
+    cat("6 - Substraction of matrix for _vs_ comparison\n")
     # Remove of the first row of the tmpData data frame kip during its construction
     tmpData <- tmpData[2:nrow(tmpData),]
     
@@ -179,7 +178,7 @@ for(x in 1:nrow(comparisonRow)){
 contrastData <- contrastData[2:nrow(contrastData),]
 
 # -----------------------------------------------------------------------------
-    if(verbose=="TRUE")cat("7 - Final comparison matrix saving\n")   
+    cat("7 - Final comparison matrix saving\n")   
 # Creation of the final data frame for saving the contrast matrix. This step create an empty row that will be remove after filling
 finalData <- data.frame(name="", comparisons="", matrix="")
 
@@ -196,8 +195,8 @@ write.table(finalData, contrastFile,sep="\t",row.names=F, quote=F)
 
                 
     # Print date, hours
-if(verbose=="TRUE"){
+
     cat("\n############\n")
     cat(format(Sys.time(), "%Y/%m/%d %H:%M:%S\n"))
     cat("Successful end of the contrast vectors building\n")
-}
+

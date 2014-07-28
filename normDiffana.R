@@ -21,17 +21,15 @@
 #
 # Original author : Vivien DESHAIES
 # -----------------------------------------------------------------------------
-buildCountMatrix <- function(files, sampleLabel,expHeader){
+buildCountMatrix <- function(files, sampleLabel, expHeader){
     
     # read first file and create countMatrix
-    countMatrix <- read.table(files[1],header=as.logical(expHeader),stringsAsFactors=F,quote="")[,c("Id","Count")]
-    # lowercase countMatrix columns names
-    colnames(countMatrix) <- tolower(colnames(countMatrix))
-    
+    countMatrix <- read.table(files[1],header=as.logical(expHeader),stringsAsFactors=F,quote="")
+    colnames(countMatrix) <- c("id", "count1")
     # read and merge all remaining files with the first
     for(i in 2:length(files)){
         # read files
-        exp <- read.table(files[i],header=as.logical(expHeader),stringsAsFactors=F,quote="")[,c("Id","Count")]
+        exp <- read.table(files[i],header=as.logical(expHeader),stringsAsFactors=F,quote="")
         # lowercase exp columns names
         colnames(exp) <- c("id", paste("count", i, sep=""))
         # merge file data to count matrix by id
@@ -165,21 +163,20 @@ buildColorVector <- function(design){
 #   This function create 3 plots for raw count matrix: unpooled clustering plot, 
 #   unpooled PCA plot and unpooled null counts barplot
 #
-#   input: verbose -> booleen (for verbose mode)
-#          projectName -> character (name of the project)
+#   input: projectName -> character (name of the project)
 #          count_mat -> data frame (the count matrix)
 #   output: 3 plots -> png
 #
 # -----------------------------------------------------------------------------
-firstPlots <- function(verbose, projectName, count_mat){
-    if(verbose=="TRUE")cat("      Fig 1 - Unpooled clustering\n") 
+firstPlots <- function(projectName, count_mat){
+    cat("      Fig 1 - Unpooled clustering\n") 
     png(paste(projectName,"-normalisation_unpooled_clustering.png", sep=""),width=1000, height=600)
         # calculation of the dispersion
         dist.mat <- dist(t(count_mat))
         plot(hclust(dist.mat), main=paste("Unpooled cluster dendrogram - ", projectName, sep=""), xlab="")
     dev.off()
     
-    if(verbose=="TRUE")cat("      Fig 2 - Unpooled PCA\n") 
+    cat("      Fig 2 - Unpooled PCA\n") 
     pcaCount <- PCA(t(count_mat), graph=FALSE)
     png(paste(projectName,"-normalisation_unpooled_PCA.png",sep=""),width=1000, height=600)
         par(mar=c(5,5,5,20))
@@ -190,7 +187,7 @@ firstPlots <- function(verbose, projectName, count_mat){
         legend(cor[2]*1.01,cor[4], title="Legend", legend=unique(design$Condition), col=unique(as.character(design$coLors)), pch=15, pt.cex=3, cex=1.2)
     dev.off()
  
-    if(verbose=="TRUE")cat("      Fig 3 - Null counts barplot\n") 
+    cat("      Fig 3 - Null counts barplot\n") 
     png(paste(projectName,"-normalisation_null_counts.png",sep=""),width=1000, height=600)
         par(mar=c(15,8,5,20))
         barplot(100*colMeans(count_mat==0), cex.lab=2, las=3, col=as.character(design$coLors) ,main=paste("Proportion of null counts per sample -", projectName, sep=" "), ylab="Proportion of null counts (%)")
@@ -208,14 +205,13 @@ firstPlots <- function(verbose, projectName, count_mat){
 #   genes and convertion of the count matrix and the design file in a DESeq object:
 #   unpooled counts barplot, unpooled counts boxplot
 #
-#   input: verbose -> booleen (for verbose mode)
-#          projectName -> character (name of the project)
+#   input: projectName -> character (name of the project)
 #          dds -> DESeq object
 #   output: 2 plots -> png
 #
 # -----------------------------------------------------------------------------
-secondPlots <- function(verbose, projectName, dds){
-    if(verbose=="TRUE")cat("      Fig 4 - Unpooled counts barplot\n") 
+secondPlots <- function(projectName, dds){
+    cat("      Fig 4 - Unpooled counts barplot\n") 
     png(paste(projectName,"-normalisation_barplot_counts.png", sep=""),width=1000, height=600)
         par(mar=c(15,8,5,20))
         barplot(colSums(counts(dds)), main=paste("Read counts - ", projectName, sep=""), col=as.character(colData(dds)$coLors), names.arg =colData(dds)$Name,cex.lab=2, las=3, ylab="Total read counts")
@@ -225,7 +221,7 @@ secondPlots <- function(verbose, projectName, dds){
         legend(cor[2]*1.01,cor[4], title="Legend", legend=unique(colData(dds)$Condition), col=unique(as.character(colData(dds)$coLors)), pch=15, pt.cex=3, cex=1.2)
     dev.off()
 
-    if(verbose=="TRUE")cat("      Fig 5 - Unpooled counts boxplot\n") 
+    cat("      Fig 5 - Unpooled counts boxplot\n") 
     png(paste(projectName,"-normalisation_boxplot_count.png", sep=""),width=1000, height=600)
         par(mar=c(15,8,5,20))
         boxplot(log2(counts(dds)+1),main=paste("Count distribution - ", projectName, sep=""), col=as.character(colData(dds)$coLors), names =colData(dds)$Name,cex.lab=2, las=3, ylab="log2 (counts+1)")
@@ -242,14 +238,13 @@ secondPlots <- function(verbose, projectName, dds){
 #   This function create 2 plots for count matrix after collapsing of technical 
 #   replicates: pooled counts barplot and pooled counts boxplot
 #
-#   input: verbose -> booleen (for verbose mode)
-#          projectName -> character (name of the project)
+#   input: projectName -> character (name of the project)
 #          dds -> DESeq object
 #   output: 2 plots -> png
 # -----------------------------------------------------------------------------
-pooledPlots <- function(verbose, projectName, dds){
+pooledPlots <- function(projectName, dds){
 
-    if(verbose=="TRUE")cat("      Fig 6 - Pooled counts barplot\n") 
+    cat("      Fig 6 - Pooled counts barplot\n") 
     png(paste(projectName,"-normalisation_barplot_counts_pooled.png", sep=""),width=1000, height=600)
         par(mar=c(15,8,5,20))
         barplot(colSums(counts(dds)), main=paste("Pooled read counts - ", projectName, sep=""), col=as.character(colData(dds)$coLors), names.arg =colData(dds)$Name,cex.lab=2, las=3, ylab="Total read counts")
@@ -259,7 +254,7 @@ pooledPlots <- function(verbose, projectName, dds){
         legend(cor[2]*1.01,cor[4], title="Legend", legend=unique(colData(dds)$Condition), col=unique(as.character(colData(dds)$coLors)), pch=15, pt.cex=3, cex=1.2)
     dev.off()
 
-    if(verbose=="TRUE")cat("      Fig 7 - Pooled counts boxplot\n") 
+    cat("      Fig 7 - Pooled counts boxplot\n") 
     png(paste(projectName,"-normalisation_boxplot_count_pooled.png", sep=""),width=1000, height=600)
         par(mar=c(15,8,5,20))
         boxplot(log2(counts(dds)+1),main=paste("Pooled count distribution - ", projectName, sep=""), col=as.character(colData(dds)$coLors), names =colData(dds)$Name,cex.lab=2, las=3, ylab="log2 (counts+1)")
@@ -277,15 +272,14 @@ pooledPlots <- function(verbose, projectName, dds){
 #   replicates and normalisation: pooled and normalised clustering, pooled and
 #   normalised PCA, pooled and normalised boxplot and most expressed sequence plot
 #
-#   input: verbose -> booleen (for verbose mode)
-#          projectName -> character (name of the project)
+#   input: projectName -> character (name of the project)
 #          dds -> DESeq object
 #   output: 2 plots -> png  
 #
 # -----------------------------------------------------------------------------
-normPlots <- function(verbose, projectName, dds){
+normPlots <- function(projectName, dds){
 
-    if(verbose=="TRUE")cat("      Fig 8 - Pooled and Normalised clustering\n") 
+    cat("      Fig 8 - Pooled and Normalised clustering\n") 
     png(paste(projectName,"-normalisation_pooled_clustering.png", sep=""),width=1000, height=600)
         # calculation of the dispertion 
         ddsStabilized <- assay(varianceStabilizingTransformation(dds))
@@ -293,7 +287,7 @@ normPlots <- function(verbose, projectName, dds){
         plot(hclust(dist.mat), main=paste("Pooled and Normalised cluster dendrogram - ", projectName, sep=""), xlab="")
     dev.off()
 
-    if(verbose=="TRUE")cat("      Fig 9 - Pooled and Normalised PCA\n") 
+    cat("      Fig 9 - Pooled and Normalised PCA\n") 
     pcaCount <- PCA(t(counts(dds, normalized=TRUE)), graph=FALSE)
     png(paste(projectName,"-normalisation_normalised_PCA.png",sep=""),width=1000, height=600)
         par(mar=c(5,5,5,20))
@@ -304,7 +298,7 @@ normPlots <- function(verbose, projectName, dds){
         legend(cor[2]*1.01,cor[4], title="Legend", legend=unique(colData(dds)$Condition), col=unique(as.character(colData(dds)$coLors)), pch=15, pt.cex=3, cex=1.2)
     dev.off()
         
-    if(verbose=="TRUE")cat("      Fig 10 - Pooled and Normalised boxplot\n") 
+    cat("      Fig 10 - Pooled and Normalised boxplot\n") 
     png(paste(projectName,"-normalisation_normalised_boxplot_count.png",sep=""),width=1000, height=600)
         par(mar=c(15,8,5,20))
         boxplot(log2(counts(dds,normalized=TRUE)+1),main=paste("Pooled and Normalised count distribution - ", projectName, sep=""), col=as.character(colData(dds)$coLors), names =colData(dds)$Name,cex.lab=2, las=3, ylab="log2 (counts+1)")
@@ -314,7 +308,7 @@ normPlots <- function(verbose, projectName, dds){
         legend(cor[2]*1.01,cor[4], title="Legend", legend=unique(colData(dds)$Condition), col=unique(as.character(colData(dds)$coLors)), pch=15, pt.cex=3, cex=1.2)
     dev.off()
         
-    if(verbose=="TRUE")cat("      Fig 11 - Most expressed features plot\n") 
+    cat("      Fig 11 - Most expressed features plot\n") 
     # preparation of 2 data frame with the same number of column than the dds count matrix 
     maxCounts <- counts(dds)[1,]
     transcriptNames <- counts(dds)[1,]
@@ -470,45 +464,43 @@ designPath <- args[5]
 deseqModel <- args[6]
 projectName <- args[7]
 expHeader <- toupper(args[8])
-verbose <- toupper(args[9])
+
 # -----------------------------------------------------------------------------
-        if(verbose =="TRUE"){
             printInformationStart(args)
-        }
+
 # load libraries
 library(DESeq2)
 library(RColorBrewer)
 library(FactoMineR)
 # -----------------------------------------------------------------------------
-        if(verbose=="TRUE"){
             cat("\n\n########################\n")
             cat("1 - Read design file\n")
-        }
+        
 # load design file
 design <- read.table(designPath, sep="\t", header=T, dec=".", stringsAsFactors=F)
 
-        if(verbose=="TRUE")cat("2 - Creation of the color vector\n")
+        cat("2 - Creation of the color vector\n")
 coLors <- buildColorVector(design)
 # add colors to the design
 design <- data.frame(design, coLors)
 
-        if(verbose=="TRUE")cat("3 - Count matrix building\n") 
+        cat("3 - Count matrix building\n") 
 # computing of expression files in one unique file
 count_mat <- buildCountMatrix(design$expressionFiles, design$Name, expHeader)
 
 ### plots: unpooled clustering plot, unpooled PCA plot and unpooled null counts barplot
-if(normFigTest=="TRUE")firstPlots(verbose, projectName, count_mat)
+if(normFigTest=="TRUE")firstPlots(projectName, count_mat)
 ###
 
-        if(verbose=="TRUE")cat("4 - DESeq2 object building\n")
+        cat("4 - DESeq2 object building\n")
 # creation of the DESeq object including the count matrix and the design file
 dds <- DESeqDataSetFromMatrix(countData=count_mat, colData=design, design=as.formula(deseqModel))
 
 ### plots: unpooled counts barplot, unpooled counts boxplot
-if(normFigTest=="TRUE")secondPlots(verbose, projectName, dds)
+if(normFigTest=="TRUE")secondPlots(projectName, dds)
 ###
 
-        if(verbose=="TRUE")cat("5 - Saving of rawCountMatrix\n")
+        cat("5 - Saving of rawCountMatrix\n")
 saveCountMatrix(counts(dds),paste(projectName,"-normalisation_rawCountMatrix.tsv", sep=""))
 
 # -----------------------------------------------------------------------------
@@ -516,14 +508,14 @@ saveCountMatrix(counts(dds),paste(projectName,"-normalisation_rawCountMatrix.tsv
 #   Collapsing technical replicates
 #
 # -----------------------------------------------------------------------------
-        if(verbose=="TRUE")cat("6 - Collapsing of technical replicates\n") 
+        cat("6 - Collapsing of technical replicates\n") 
 dds <- collapseReplicates(dds, groupby=dds$RepTechGroup)
 
 ### plots: pooled counts barplot and pooled counts boxplot
-if(normFigTest=="TRUE")pooledPlots(verbose, projectName, dds)
+if(normFigTest=="TRUE")pooledPlots(projectName, dds)
 ###
 
-        if(verbose=="TRUE")cat("7 - Saving of rawPooledCountMatrix\n")
+        cat("7 - Saving of rawPooledCountMatrix\n")
 saveCountMatrix(counts(dds),paste(projectName,"-normalisation_rawPooledCountMatrix.tsv", sep=""))
 
 # -----------------------------------------------------------------------------
@@ -531,14 +523,14 @@ saveCountMatrix(counts(dds),paste(projectName,"-normalisation_rawPooledCountMatr
 #   Normalisation
 #
 # -----------------------------------------------------------------------------
-        if(verbose=="TRUE")cat("8 - Normalisation\n")
+        cat("8 - Normalisation\n")
 dds <- estimateSizeFactors(dds)
 
 ### plots: pooled and normalised clustering, pooled and normalised PCA, pooled and normalised boxplot and most expressed sequence plot
-if(normFigTest=="TRUE")normPlots(verbose, projectName, dds)
+if(normFigTest=="TRUE")normPlots(projectName, dds)
 ###
 
-        if(verbose=="TRUE")cat("9 - Saving of normalisedCountMatrix\n")
+        cat("9 - Saving of normalisedCountMatrix\n")
 saveCountMatrix(counts(dds,normalized=TRUE),paste(projectName,"-normalisation_normalisedCountMatrix.tsv", sep=""))
 
 # -----------------------------------------------------------------------------
@@ -548,17 +540,17 @@ saveCountMatrix(counts(dds,normalized=TRUE),paste(projectName,"-normalisation_no
 # -----------------------------------------------------------------------------
 
 if(diffanaTest=="TRUE"){
-        if(verbose=="TRUE")cat("10 - Dispersion estimations\n")
+        cat("10 - Dispersion estimations\n")
     dds <- estimateDispersions(dds)
     if(diffanaFigTest=="TRUE"){
-        if(verbose=="TRUE")cat("      Fig 12 - Dispersion plot\n") 
+        cat("      Fig 12 - Dispersion plot\n") 
         png(paste(projectName,"-diffana_plot_disp.png",sep=""),width=1000, height=600)
             plotDispEsts(dds, main=paste("Dispersion estimation scatter plot - ", projectName, sep=""))
         dev.off()
     }
     # if differential analysis using contrast matrix
     if(contrastTest != "FALSE"){
-        if(verbose=="TRUE")cat("11 - Differential analysis using contrast matrix\n")
+        cat("11 - Differential analysis using contrast matrix\n")
         # statistical analysis
         dds <- nbinomWaldTest(dds, modelMatrixType="expanded")
         contrastMatrix <- read.table(contrastTest, sep="\t", header=T, dec=".", stringsAsFactors=F)
@@ -576,7 +568,7 @@ if(diffanaTest=="TRUE"){
         unique_condition <- unique(design$Condition)
         # if no reference condition
         if(nrow(TrueRef)<1){
-            if(verbose=="TRUE")cat("11 - Differential analysis without contrast matrix and without reference condition\n")        
+            cat("11 - Differential analysis without contrast matrix and without reference condition\n")        
             for(i in 1:(length(unique_condition)-1)){
                 for(j in (i+1):length(unique_condition)){
                     if(unique_condition[i] != unique_condition[j]){
@@ -586,7 +578,7 @@ if(diffanaTest=="TRUE"){
             }
         # if reference condition
         }else{
-            if(verbose=="TRUE")cat("11 - Differential analysis without contrast matrix and with reference condition\n") 
+            cat("11 - Differential analysis without contrast matrix and with reference condition\n") 
             for(i in 1:length(unique_condition)){
                 if(unique_condition[i] != TrueRef$Condition[1]){
                     anadiff(dds, TrueRef$Condition[1], unique_condition[i], diffanaFigTest, projectName) 
@@ -597,6 +589,4 @@ if(diffanaTest=="TRUE"){
 }
 
 # End printing
-if(verbose =="TRUE"){
     printInformationEnd()
-}

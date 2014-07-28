@@ -16,7 +16,6 @@ from optparse import OptionParser, OptionGroup
 usage = "usage: %prog [options] arg1 arg2"
 
 parser = OptionParser()
-parser.add_option("-v", "--verbose", type = "string", dest = "verbose", default = "TRUE", help ="Verbose mode\nDefault = TRUE")
 
 group = OptionGroup(parser, "Compulsory option")
 group.add_option("-m", "--model", type = "string", dest = "model", help ="The DESeq2 model to be used for the differential analysis\nas a formula: ~condition1+condition2+condition1:condition2 for more information about the formula please refer to the DESeq2 documentation http://www.bioconductor.org/packages/release/bioc/html/DESeq2.html")
@@ -43,9 +42,6 @@ options, arguments = parser.parse_args()
 
 ##############################################################
 # Error messages
-if options.verbose.upper() != "TRUE" and options.verbose.upper() != "FALSE":
-    sys.exit("error: -v --verbose option only accepts 2 values TRUE or FALSE. Please use the -h option and refer to the help section")  
-###
 if not options.model:
     sys.exit("Model option is missing please use -m or --model") 
 ###    
@@ -76,7 +72,6 @@ if options.buildContrast.upper() == "TRUE":
     commandBuilContrast.append("\""+options.model+"\"")
     commandBuilContrast.append(options.comparisonFile)
     commandBuilContrast.append("{0}-contrastFile.tsv".format(options.projectName))
-    commandBuilContrast.append(options.verbose)
     commandBuilContrast = " ".join(commandBuilContrast)
     command.append(commandBuilContrast)
     command.append(";")
@@ -96,7 +91,6 @@ if options.normDiffana.upper() == "TRUE":
     commandNormDiffana.append("\""+options.model+"\"")
     commandNormDiffana.append(options.projectName)
     commandNormDiffana.append(options.expHeader)
-    commandNormDiffana.append(options.verbose)
     commandNormDiffana = " ".join(commandNormDiffana)
     command.append(commandNormDiffana)
     command.append(") &> ")
