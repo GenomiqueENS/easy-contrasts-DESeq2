@@ -3,7 +3,7 @@
 ## Normalisation and Differential analysis using DESeq2 R package 
 ## for RNA sequencing analysis
 # 
-##  Version 1.2 (07/25/2014)
+##  Version 1.3 (07/27/2014)
 #
 ## Author : Xavier Bauquet
 ###############################################################################

@@ -7,7 +7,7 @@
 # Script to run and formatte options for both scripts 
 # buildContrast.R and normDiffana.R
 # 
-# Version 1.2 (07/25/2014)
+# Version 1.3 (07/28/2014)
 #
 # Author: Xavier Bauquet
 ##############################################################
@@ -18,24 +18,24 @@ usage = "usage: %prog [options] arg1 arg2"
 parser = OptionParser()
 
 group = OptionGroup(parser, "Compulsory option")
-group.add_option("-m", "--model", type = "string", dest = "model", help ="The DESeq2 model to be used for the differential analysis\nas a formula: ~condition1+condition2+condition1:condition2 for more information about the formula please refer to the DESeq2 documentation http://www.bioconductor.org/packages/release/bioc/html/DESeq2.html")
+group.add_option("-m", "--model", type = "string", dest = "model", help ="The DESeq2 model to be used for the differential analysis as a formula: ~condition1+condition2+condition1:condition2 for more information about the formula please refer to the DESeq2 documentation http://www.bioconductor.org/packages/release/bioc/html/DESeq2.html")
 parser.add_option_group(group)
 group = OptionGroup(parser, "Option for analysis with contrast vectors:")
-group.add_option("-c", "--contrast", type = "string", dest = "contrast", default = "FALSE", help ="booleen TRUE/FALSE to escape or not the use of contrast vectors for differential anlysis\nDefault = FALSE")
-group.add_option("-b", "--buildContrast", type = "string", dest = "buildContrast", default = "FALSE", help ="booleen TRUE/FALSE to escape or not the building of contrast vectors\nDefault = FALSE")
+group.add_option("-c", "--contrast", type = "string", dest = "contrast", default = "FALSE", help ="logical TRUE/FALSE to escape or not the use of contrast vectors for differential anlysis. Default = FALSE")
+group.add_option("-b", "--buildContrast", type = "string", dest = "buildContrast", default = "FALSE", help ="logical TRUE/FALSE to escape or not the building of contrast vectors. Default = FALSE")
 parser.add_option_group(group)
 group = OptionGroup(parser, "Files options")
 group.add_option("-f", "--designFile", type = "string", dest = "designFile", default = "deseqDesign.txt", help ="Name of the design file\nDefault = deseqDesign.txt")
-group.add_option("-C", "--comparisonFile", type = "string", dest = "comparisonFile", default = "comparisonFile.txt", help ="Name of the file including the comparison to be compute in contrast vector.\nComparisons must have this form: condition1%condition2_vs_condition3%condition4 where the % mean interaction between conditions and _vs_ mean a comparison between interactions\nDefault = comparisonFile.txt")
+group.add_option("-C", "--comparisonFile", type = "string", dest = "comparisonFile", default = "comparisonFile.txt", help ="Name of the file including the comparison to be computed in contrast vector. Comparisons must have this form: condition1%condition2_vs_condition3%condition4 where the % mean interaction between conditions and _vs_ mean a comparison between interactions. Default = comparisonFile.txt")
 
 parser.add_option_group(group)
 group = OptionGroup(parser, "Other options")
-group.add_option("-n", "--normFig", type = "string", dest = "normFig", default = "TRUE", help ="booleen TRUE/FALSE to escape or not figures from the normalisation part\nDefault = TRUE")
-group.add_option("-D", "--diffana", type = "string", dest = "diffana", default = "TRUE", help ="booleen TRUE/FALSE to escape or not the differential analysis\nDefault = TRUE")
-group.add_option("-d", "--diffanaFig", type = "string", dest = "diffanaFig", default = "TRUE", help ="booleen TRUE/FALSE to escape or not figures from the differential analysis\nDefault = TRUE")
-group.add_option("-p", "--projectName", type = "string", dest = "projectName", default = "exp1", help ="Name of the project\nDefault = exp1")
-group.add_option("-H", "--expHeader", type = "string", dest = "expHeader", default = "TRUE", help ="booleen TRUE/FALSE, TRUE if expression files have a header\nDefault = TRUE")
-group.add_option("-N", "--normDiffana", type = "string", dest = "normDiffana", default = "TRUE", help ="booleen TRUE/FALSE, FALSE to escape the normalisation and differential analysis steps\nDefault = TRUE")
+group.add_option("-n", "--normFig", type = "string", dest = "normFig", default = "TRUE", help ="logical TRUE/FALSE to escape or not figures from the normalisation part. Default = TRUE")
+group.add_option("-D", "--diffana", type = "string", dest = "diffana", default = "TRUE", help ="logical TRUE/FALSE to escape or not the differential analysis. Default = TRUE")
+group.add_option("-d", "--diffanaFig", type = "string", dest = "diffanaFig", default = "TRUE", help ="logical TRUE/FALSE to escape or not figures from the differential analysis. Default = TRUE")
+group.add_option("-p", "--projectName", type = "string", dest = "projectName", default = "exp1", help ="Name of the project. Default = exp1")
+group.add_option("-H", "--expHeader", type = "string", dest = "expHeader", default = "TRUE", help ="logical TRUE/FALSE, TRUE if expression files have a header. Default = TRUE")
+group.add_option("-N", "--normDiffana", type = "string", dest = "normDiffana", default = "TRUE", help ="logical TRUE/FALSE, FALSE to escape the normalisation and differential analysis steps. Default = TRUE")
 parser.add_option_group(group)
 
 options, arguments = parser.parse_args()

@@ -3,7 +3,7 @@
 ## R script for generation of contrast matrix using by  
 ## DESeq2 for complex comparison 
 # 
-##  Version 1.2 (07/25/2014)
+##  Version 1.3 (07/27/2014)
 #
 ## Author : Xavier Bauquet
 ###############################################################################
