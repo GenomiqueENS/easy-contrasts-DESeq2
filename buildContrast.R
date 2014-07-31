@@ -1,34 +1,33 @@
 #!/usr/bin/env Rscript
 ###############################################################################
-## R script for generation of contrast matrix using by  
-## DESeq2 for complex comparison 
-# 
+## R script for generation of contrast matrix using by
+## DESeq2 for complex comparison
+#
 ##  Version 1.4 (07/31/2014)
 #
 ## Author : Xavier Bauquet
 ###############################################################################
 
 ###############################################################################
-# 
+#
 ## Main
-# 
+#
 ###############################################################################
-args <- commandArgs(TRUE) 
+args <- commandArgs(TRUE)
 # Parameters
 designPath <- args[1]
 deseqModel <- args[2]
 comparisonPath <- args[3]
 contrastFile <- args[4]
 
-         
-    # Print date, hours, packages version and parameters for log file 
+    # Print date, hours, packages version and parameters for log file
     cat("\n\n########################################################\n")
     cat("Start of the DESeq2 contrast matrix generator script version 1.2\n")
     cat("########################################################\n\n")
     cat(format(Sys.time(), "%Y/%m/%d %H:%M:%S\n"))
     cat(R.version.string)
     cat(paste("\nDESeq2 version", packageVersion("DESeq2")))
-    
+
     # Print parameters
     cat("\n\n########################\n")
     cat("Params\n")
@@ -37,19 +36,19 @@ contrastFile <- args[4]
     cat(paste("\nDESeq2 modele            =", deseqModel))
     cat(paste("\nComparison file          =", comparisonPath))
     cat("\n\n########################\n\n")
-         
+
 # Loading of DESeq2 library
-library(DESeq2)                
-# -----------------------------------------------------------------------------                
+library(DESeq2)
+# -----------------------------------------------------------------------------
     cat("\n\n########################\n")
-    cat("1 - Read design file\n") 
+    cat("1 - Read design file\n")
 # Loading of the design file
 design <- read.table(designPath, sep="\t", header=T, dec=".", stringsAsFactors=F)
 
 # -----------------------------------------------------------------------------
     cat("2 - Artificial count matrix building\n")
 # Creation of the random count matrix for running the DESeq2 minimal script to pick up the B factors
-# Multiplication by 3 are present for the 3 row of the matrix 
+# Multiplication by 3 are present for the 3 row of the matrix
 forCounts <- rep(1, (nrow(design)*3))
 for (i in 1:(nrow(design)*3)){
     forCounts[i] <- round(runif(1, min=1, max=1000000000), digits=0)
@@ -57,13 +56,13 @@ for (i in 1:(nrow(design)*3)){
 counts <- matrix(data=forCounts, nrow=3)
 
 # -----------------------------------------------------------------------------
-    cat("3 - DESeq2 function runing for B factors names\n") 
-# DESeq2 minimal script for pick up the B factors                
+    cat("3 - DESeq2 function runing for B factors names\n")
+# DESeq2 minimal script for pick up the B factors
 dds <- DESeqDataSetFromMatrix(countData=counts, colData=design, design=as.formula(deseqModel))
 dds <- estimateSizeFactors(dds)
 dds <- estimateDispersions(dds)
 dds <- nbinomWaldTest(dds, modelMatrixType="expanded")
-# B factors 
+# B factors
 Bfactors <- resultsNames(dds)
 
 
@@ -75,7 +74,7 @@ Bfactors <- resultsNames(dds)
 # Zero vector of the length of Bfactors-1 (- the Intercept factor) that will be used in column for the construction of the betaFactorDFrame
 B <- rep(0, (length(Bfactors)-1))
 # -----------------------------------------------------------------------------
-    cat("3 - DESeq2 function runing for B factors names\n") 
+    cat("3 - DESeq2 function runing for B factors names\n")
 # Creation of the model matrix for each condition with associatedVectoring 1 on the diagonal to have 1 at the good place for each beta factor
 betaFactorDFrame <- data.frame(condition= Bfactors[2:length(Bfactors)])
 for(i in 1:length(Bfactors)){
@@ -89,8 +88,8 @@ for(i in 1:length(Bfactors)){
 contrastData <- betaFactorDFrame[1,]
 names(contrastData)[1] <- "comparison"
 
-# -----------------------------------------------------------------------------                
-    cat("4 - Read comparison file\n") 
+# -----------------------------------------------------------------------------
+    cat("4 - Read comparison file\n")
 # Loading of the comparison file
 comparisonFile <- read.table(comparisonPath, sep="\t", header=F, dec=".", stringsAsFactors=F)
 
@@ -99,19 +98,19 @@ comparisonFile <- read.table(comparisonPath, sep="\t", header=F, dec=".", string
 # For each row of the comparison file (for each comparison)
 for(comparisonRow in 1:nrow(comparisonFile)){
     # Separation of the comparison formula by the "_vs_" to obtain a vector including all %-interaction to compare
-    comparisonFormulas <- unlist(strsplit(as.vector(comparisonFile[comparisonRow,2]), "_vs_")) 
-    # Creation of a temporary data frame for saving the contrast vectors from each %-interaction. This data frame is 
+    comparisonFormulas <- unlist(strsplit(as.vector(comparisonFile[comparisonRow,2]), "_vs_"))
+    # Creation of a temporary data frame for saving the contrast vectors from each %-interaction. This data frame is
     # build from the betaFactorDFrame data frame kipping the first row without the "condition" column to kip only column
-    # corresponding to the contrast vector. The first line kip during the construction of the data frame will be 
+    # corresponding to the contrast vector. The first line kip during the construction of the data frame will be
     # remove after filling
     tmpData <- betaFactorDFrame[1,2:ncol(betaFactorDFrame)]
     # For each %-interaction of the "_vs_" comparison
     for(y in 1:length(comparisonFormulas)){
-        # %-interaction separations to obtain a vector 
-        vectorsToAssociate <- unlist(strsplit(comparisonFormulas[y], "%")) 
+        # %-interaction separations to obtain a vector
+        vectorsToAssociate <- unlist(strsplit(comparisonFormulas[y], "%"))
         # Creation of the associatedVector vector for the associatedVectorition of the contrast vectors in %-interaction
         associatedVector <- 0
-        # Test the presence of :-interaction factor (ex: status:disease) and associatedVector of contrast vector 
+        # Test the presence of :-interaction factor (ex: status:disease) and associatedVector of contrast vector
         # for :-interaction factor to the associatedVector vector
         for(i in 1:length(vectorsToAssociate)-1){
             for(j in 2:length(vectorsToAssociate)){
@@ -130,22 +129,22 @@ for(comparisonRow in 1:nrow(comparisonFile)){
             }
         }
         # Pick up column names of interest in the deseq model formula. To select only the names of the interest columns of
-        # the design file, the deseqModel is separated by the "+" and the first character "~" is remove. In the columnNames 
-        # vector obtained names including the ":" character are remove to kip only column names of interest. 
+        # the design file, the deseqModel is separated by the "+" and the first character "~" is remove. In the columnNames
+        # vector obtained names including the ":" character are remove to kip only column names of interest.
         columnNames <- unlist(strsplit(as.vector(substr(deseqModel, 2, nchar(deseqModel))), "+",fixed = TRUE))
         columnNames <- columnNames[setdiff(seq(columnNames), grep(":", columnNames))]
 
         # For each names on columnNames
         for( columnNumber in 1:length(columnNames)){
-            # Selection into the sameColumnFactorNames vector of all %-interaction condition that begin be the names of the column. This 
-            # step aims to test the number of condition from the same column into the %-interaction. If there is more than 
+            # Selection into the sameColumnFactorNames vector of all %-interaction condition that begin be the names of the column. This
+            # step aims to test the number of condition from the same column into the %-interaction. If there is more than
             # one condition from the column each B factor have to be divide by the number of condition from the same column.
             sameColumnFactorNames <- grep(paste("^", columnNames[columnNumber], sep=""), vectorsToAssociate, value = TRUE)
             # If at least one condition used from the column
             if(length(sameColumnFactorNames)>0){
                 # For each condition of the column
                 for( p in 1:length(sameColumnFactorNames)){
-                    # Pick up of the contrast vector of the condition 
+                    # Pick up of the contrast vector of the condition
                     betaFactorVector<- subset(betaFactorDFrame, condition == sameColumnFactorNames[p])[2:length(names(betaFactorDFrame))]
                     # The vector is divide by the number of conditions from the same column
                     betaFactorVector<- vec/length(sameColumnFactorNames)
@@ -157,12 +156,12 @@ for(comparisonRow in 1:nrow(comparisonFile)){
         # Save the associatedVector vector into the temporary data frame
         tmpData <- rbind(tmpData, associatedVector)
     }
-    
-# -----------------------------------------------------------------------------                
+
+# -----------------------------------------------------------------------------
     cat("6 - Substraction of matrix for _vs_ comparison\n")
     # Remove of the first row of the tmpData data frame kip during its construction
     tmpData <- tmpData[2:nrow(tmpData),]
-    
+
     # Subtraction for a comparison of 2 group (ex: group1_vs_group2)
     if(nrow(tmpData) == 2){
         sum <- tmpData[1,] - tmpData[2,]
@@ -183,7 +182,7 @@ for(comparisonRow in 1:nrow(comparisonFile)){
 contrastData <- contrastData[2:nrow(contrastData),]
 
 # -----------------------------------------------------------------------------
-    cat("7 - Final comparison matrix saving\n")   
+    cat("7 - Final comparison matrix saving\n")
 # Creation of the final data frame for saving the contrast matrix. This step create an empty row that will be remove after filling
 finalData <- data.frame(name="", comparisons="", vectors="")
 
@@ -198,7 +197,7 @@ finalData <- finalData[2:nrow(finalData),]
 # Saving of the contrast matrix
 write.table(finalData, contrastFile,sep="\t",row.names=F, quote=F)
 
-                
+
     # Print date, hours
 
     cat("\n############\n")
