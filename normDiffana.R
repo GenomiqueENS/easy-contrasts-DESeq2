@@ -7,6 +7,7 @@
 #
 ## Author : Xavier Bauquet
 ###############################################################################
+
 # -----------------------------------------------------------------------------
 # buildCountMatrix
 # Create a matrix of reads count
@@ -71,6 +72,7 @@ saveCountMatrix <- function(countMatrix,fileName){
     # Write the count matrix in a file
     write.table(countMatrix, paste(fileName, sep=""),sep="\t",row.names=F, quote=F)
 }
+
 ###############################################################################
 # -----------------------------------------------------------------------------
 # printInformationStart
@@ -156,6 +158,7 @@ buildColorVector <- function(design){
     }
     return(coLors)
 }
+
 ###############################################################################
 # -----------------------------------------------------------------------------
 # firstPlots
@@ -197,6 +200,7 @@ firstPlots <- function(projectName, count_mat){
         legend(cor[2]*1.01,cor[4], title="Legend", legend=unique(design$Condition), col=unique(as.character(design$coLors)), pch=15, pt.cex=3, cex=1.2)
     dev.off()
 }
+
 ###############################################################################
 # -----------------------------------------------------------------------------
 # secondPlots
@@ -231,6 +235,7 @@ secondPlots <- function(projectName, dds){
         legend(cor[2]*1.01,cor[4], title="Legend", legend=unique(colData(dds)$Condition), col=unique(as.character(colData(dds)$coLors)), pch=15, pt.cex=3, cex=1.2)
     dev.off()
 }
+
 ###############################################################################
 # -----------------------------------------------------------------------------
 # pooledPlots
@@ -264,6 +269,7 @@ pooledPlots <- function(projectName, dds){
         legend(cor[2]*1.01,cor[4], title="Legend", legend=unique(colData(dds)$Condition), col=unique(as.character(colData(dds)$coLors)), pch=15, pt.cex=3, cex=1.2)
     dev.off()
 }
+
 ###############################################################################
 # -----------------------------------------------------------------------------
 # normPlots
@@ -301,6 +307,7 @@ normPlots <- function(projectName, dds){
     else{
         cat("   Fig8: Pooled and Normalised clustering and Fig9: Pooled and Normalised PCA were escaped because we have less or 2 technical replicates")
     }
+
     cat("      Fig 10 - Pooled and Normalised boxplot\n")
     png(paste(projectName,"-normalisation_normalised_boxplot_count.png",sep=""),width=1000, height=600)
         par(mar=c(15,8,5,20))
@@ -333,6 +340,7 @@ normPlots <- function(projectName, dds){
         legend(cor[2]*1.01,cor[4], title="Legend", legend=unique(colData(dds)$Condition), col=unique(as.character(colData(dds)$coLors)), pch=15, pt.cex=3, cex=1.2)
     dev.off()
 }
+
 ###############################################################################
 # -----------------------------------------------------------------------------
 # anadiff
@@ -361,6 +369,7 @@ anadiff <- function(dds, condition1, condition2, param, projectName){
     saveCountMatrix(res,paste(projectName,"-diffana_",condition1,"_vs_",condition2,".tsv", sep=""))
     cat(paste("Comparison: ",paste(condition1,"_vs_", condition2,sep="")," finish\n", sep=""))
 }
+
 ###############################################################################
 # -----------------------------------------------------------------------------
 # contrastAnadiff
@@ -393,6 +402,7 @@ contrastAnadiff <- function(dds, nameContrastVec,vsContrastVec, contrastVec, par
     saveCountMatrix(res,paste(projectName,"-diffana_",nameContrastVec,".tsv", sep=""))
     cat(paste("Comparison: ",vsContrastVec," finish\n", sep=""))
 }
+
 ###############################################################################
 # -----------------------------------------------------------------------------
 # anadiffPlots
@@ -443,6 +453,7 @@ anadiffPlots <- function(condName, projectName,res){
         par(xpd=NA)
     dev.off()
 }
+
 ###############################################################################
 # -----------------------------------------------------------------------------
 # printInformationEnd
@@ -551,6 +562,7 @@ saveCountMatrix(counts(dds,normalized=TRUE),paste(projectName,"-normalisation_no
 if(diffanaTest==TRUE){
         cat("10 - Dispersion estimations\n")
     dds <- estimateDispersions(dds)
+
     if(diffanaFigTest==TRUE){
         cat("      Fig 12 - Dispersion plot\n")
         png(paste(projectName,"-diffana_plot_disp.png",sep=""),width=1000, height=600)

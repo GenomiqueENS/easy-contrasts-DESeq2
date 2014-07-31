@@ -75,8 +75,10 @@ Bfactors <- resultsNames(dds)
 B <- rep(0, (length(Bfactors)-1))
 # -----------------------------------------------------------------------------
     cat("3 - DESeq2 function runing for B factors names\n")
+
 # Creation of the model matrix for each condition with associatedVectoring 1 on the diagonal to have 1 at the good place for each beta factor
 betaFactorDFrame <- data.frame(condition= Bfactors[2:length(Bfactors)])
+
 for(i in 1:length(Bfactors)){
     betaFactorDFrame <- data.frame(betaFactorDFrame, B)
     if(i > 1){
@@ -98,6 +100,7 @@ comparisonFile <- read.table(comparisonPath, sep="\t", header=F, dec=".", string
 # For each row of the comparison file (for each comparison)
 for(comparisonRow in 1:nrow(comparisonFile)){
     # Separation of the comparison formula by the "_vs_" to obtain a vector including all %-interaction to compare
+
     comparisonFormulas <- unlist(strsplit(as.vector(comparisonFile[comparisonRow,2]), "_vs_"))
     # Creation of a temporary data frame for saving the contrast vectors from each %-interaction. This data frame is
     # build from the betaFactorDFrame data frame kipping the first row without the "condition" column to kip only column

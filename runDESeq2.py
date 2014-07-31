@@ -1,5 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+import os, sys
+from optparse import OptionParser, OptionGroup
 
 ##############################################################
 # runDESeq2
@@ -121,3 +123,4 @@ if options.normDiffana.upper() == "TRUE":
 
 # Execute command line
 os.system(command)
+
