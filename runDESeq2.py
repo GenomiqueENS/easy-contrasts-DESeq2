@@ -7,7 +7,7 @@
 # Script to run and formatte options for both scripts 
 # buildContrast.R and normDiffana.R
 # 
-# Version 1.3 (07/28/2014)
+# Version 1.4 (07/31/2014)
 #
 # Author: Xavier Bauquet
 ##############################################################
