@@ -1,0 +1,9 @@
+Name	Condition	RepTechGroup	Reference	expressionFiles	type	day
+sample1	WT-day1a	WT-day1	false	expression_WT-day1a.tsv	WT	1
+sample2	WT-day1b	WT-day1	false	expression_WT-day1b.tsv	WT	1
+sample3 KO-day1a	KO-day1	false	expression_KO-day1a.tsv	KO	1
+sample4 KO-day1b        KO-day1 false   expression_KO-day1b.tsv KO      1
+sample5 WT-day2a        WT-day2 false   expression_WT-day2a.tsv WT      2
+sample6 WT-day2b        WT-day2 false   expression_WT-day2b.tsv WT      2
+sample7 KO-day2a        KO-day2 false   expression_KO-day2a.tsv KO      2
+sample8 KO-day2b        KO-day2 false   expression_KO-day2b.tsv KO      2
