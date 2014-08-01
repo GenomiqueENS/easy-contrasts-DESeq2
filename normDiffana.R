@@ -583,7 +583,7 @@ if(diffanaTest==TRUE){
         # statistical analysis
         dds <- DESeq(dds)
         # selection of the reference condition
-        design$Reference <- toupper(design$Reference)
+        design$Reference <- as.logical(toupper(design$Reference))
         TrueRef <- subset(design, Reference %in% TRUE)
         # selection of conditions
         unique_condition <- unique(design$Condition)
