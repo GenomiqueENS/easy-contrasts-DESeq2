@@ -3,7 +3,7 @@
 ## Normalisation and Differential analysis using DESeq2 R package
 ## for RNA sequencing analysis
 #
-##  Version 1.4 (07/31/2014)
+##  Version 1.5 (06/04/2014)
 #
 ## Author : Xavier Bauquet
 ###############################################################################
@@ -94,7 +94,7 @@ printInformationStart <- function(args){
     cat("\n\n########################\n")
     cat("Params\n")
     cat("########################\n")
-    cat(paste("Figures                                        =", as.character(normFigTest)))
+    cat(paste("Figures                                          =", as.character(normFigTest)))
     cat(paste("\nDifferential analysis                          =", as.character(diffanaTest)))
     cat(paste("\nFigures of the differential analysis           =", as.character(diffanaFigTest)))
     cat(paste("\nContrast matrix for differential analysis      =", as.character(contrastTest)))
@@ -102,7 +102,11 @@ printInformationStart <- function(args){
     cat(paste("\nDESeq2 modele                                  =",deseqModel))
     cat(paste("\nProject name                                   =",projectName))
     cat(paste("\nHeader on expression files                     =",as.character(expHeader)))
+    cat(paste("\nSize factors type for size factors estimation  =",as.character(sizeFactorType)))
+    cat(paste("\nFit type for dispersions estimation            =",as.character(fitType)))
+    cat(paste("\nStatistic test                                 =",as.character(statisticTest)))
     cat("\n\n########################\n\n")
+
 }
 
 ###############################################################################
@@ -484,6 +488,10 @@ designPath <- args[5]
 deseqModel <- args[6]
 projectName <- args[7]
 expHeader <- as.logical(toupper(args[8]))
+sizeFactorType <- args[9]
+fitType <- args[10]
+statisticTest <- args[11]
+
 
 # -----------------------------------------------------------------------------
             printInformationStart(args)
@@ -544,7 +552,7 @@ saveCountMatrix(counts(dds),paste(projectName,"-normalisation_rawPooledCountMatr
 #
 # -----------------------------------------------------------------------------
         cat("8 - Normalisation\n")
-dds <- estimateSizeFactors(dds)
+dds <- estimateSizeFactors(dds, type=sizeFactorType)
 
 ### plots: pooled and normalised clustering, pooled and normalised PCA, pooled and normalised boxplot and most expressed sequence plot
 if(normFigTest==TRUE)normPlots(projectName, dds)
@@ -561,7 +569,7 @@ saveCountMatrix(counts(dds,normalized=TRUE),paste(projectName,"-normalisation_no
 
 if(diffanaTest==TRUE){
         cat("10 - Dispersion estimations\n")
-    dds <- estimateDispersions(dds)
+    dds <- estimateDispersions(dds, fitType=fitType)
 
     if(diffanaFigTest==TRUE){
         cat("      Fig 12 - Dispersion plot\n")
@@ -573,15 +581,16 @@ if(diffanaTest==TRUE){
     if(contrastTest != "FALSE"){
         cat("11 - Differential analysis using contrast matrix\n")
         # statistical analysis
-        dds <- nbinomWaldTest(dds, modelMatrixType="expanded")
+        dds <- DEseq(dds, test=statisticTest, betaPrior=TRUE,  modelMatrixType="expanded", fitType=fitType)
         contrastMatrix <- read.table(contrastTest, sep="\t", header=T, dec=".", stringsAsFactors=F)
         for(i in 1:nrow(contrastMatrix)){
             contrastAnadiff(dds,contrastMatrix[i,1],contrastMatrix[i,2],contrastMatrix[i,3], diffanaFigTest, projectName)
         }
 
     }else{
+		cat("11 - Differential analysis without contrast matrix\n")
         # statistical analysis
-        dds <- DESeq(dds)
+        dds <- DESeq(dds, test=statisticTest, betaPrior=FALSE, fitType=fitType)
         # selection of the reference condition
         design$Reference <- as.logical(toupper(design$Reference))
         TrueRef <- subset(design, Reference %in% TRUE)
@@ -589,7 +598,7 @@ if(diffanaTest==TRUE){
         unique_condition <- unique(design$Condition)
         # if no reference condition
         if(nrow(TrueRef)<1){
-            cat("11 - Differential analysis without contrast matrix and without reference condition\n")
+            cat("12 - Differential analysis without contrast matrix and without reference condition\n")
             for(i in 1:(length(unique_condition)-1)){
                 for(j in (i+1):length(unique_condition)){
                     if(unique_condition[i] != unique_condition[j]){
@@ -599,7 +608,7 @@ if(diffanaTest==TRUE){
             }
         # if reference condition
         }else{
-            cat("11 - Differential analysis without contrast matrix and with reference condition\n")
+            cat("12 - Differential analysis without contrast matrix and with reference condition\n")
             for(i in 1:length(unique_condition)){
                 if(unique_condition[i] != TrueRef$Condition[1]){
                     anadiff(dds, TrueRef$Condition[1], unique_condition[i], diffanaFigTest, projectName)

@@ -35,6 +35,9 @@ All options available on the Easy-contrast-DEseq2 are presented here:
   * **-D --diffana** : TRUE/FALSE. If this option is set to “FALSE” , the differential analysis step will be escaped. **Default=** TRUE.
   * **-p --projectName** : The name of the project. **Default=** exp1.
   * **-H --expHeader** :  TRUE/FALSE. “TRUE” if the expression files have a header. **Default=** TRUE.
+  * **--sizeFactorsType** : ratio or iterate. Define the type of size factor estimation. **Default=** ratio.
+  * **--fitType** : parametric, local or mean. Define the type of dispertion estimation. **Default=** parametric.
+  * **--statisticTest** : Wald or LRT. Define the statistical test to be used for the differential analysis. **Default=** Wald.
 
 ###Classical mode:
 The Classical mode performs the differential analysis on "Condition" column: all biological replicates are compared to each other.
@@ -60,10 +63,10 @@ To run the Easy-contrast-DEseq2 module on the Contrast mode, use the following c
 ```
 
 ##Installation: 
-This module was coded using R version 3.1.0, DESeq2 1.4.5, and two other R packages RcolorBrewer 1.0.5 and FactoMineR 1.26. 
+This module was coded using R version 3.2.0, DESeq2 1.8.1, and two other R packages RcolorBrewer 1.1-2 and FactoMineR 1.28. 
 To use Easy-contrast-DEseq2 you should: 
   * Install the good version of R, and of all the packages
-  * Use the docker file available on [genomicpariscentre/deseq2](https://registry.hub.docker.com/u/genomicpariscentre/deseq2/)
+  * Use the docker available on [genomicpariscentre/deseq2](https://registry.hub.docker.com/u/genomicpariscentre/deseq2/)
   * Use the Dockerfile present in  Easy-contrast-DEseq2 to install the docker directly on your computer
 
 ##Input files:
