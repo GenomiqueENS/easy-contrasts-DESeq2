@@ -9,7 +9,7 @@ from optparse import OptionParser, OptionGroup
 # Script to run and formatte options for both scripts
 # buildContrast.R and normDiffana.R
 #
-# Version 1.5 (06/04/2015)
+# Version 1.6 (06/18/2015)
 #
 # Author: Xavier Bauquet
 ##############################################################
@@ -35,6 +35,7 @@ def createParser():
 	group = OptionGroup(parser, "Files options")
 	group.add_option("-f", "--designFile", type = "string", dest = "designFile", default = "deseqDesign.txt", help ="Name of the design file\nDefault = deseqDesign.txt")
 	group.add_option("-C", "--comparisonFile", type = "string", dest = "comparisonFile", default = "comparisonFile.txt", help ="Name of the file including the comparison to be computed in contrast vector. Comparisons must have this form: condition1%condition2_vs_condition3%condition4 where the % mean interaction between conditions and _vs_ mean a comparison between interactions. Default = comparisonFile.txt")
+	group.add_option("--contrastFile", type = "string", dest = "contrastFile", default = "", help ="contrast file including the contrast vectors for the differential analysis.  Default = contrastFile.txt")
 	parser.add_option_group(group)
 
 	# Other options
@@ -48,7 +49,10 @@ def createParser():
 	group.add_option("--sizeFactorsType", type = "string", dest = "sizeFactorType", default = "ratio", help ="Type of size factor estimation to do. Two values possible: ratio or iterate.  Default = ratio")
 	group.add_option("--fitType", type = "string", dest = "fitType", default = "parametric", help ="Fit type to be used in the dispersions estimation. Three values possible: parametric, local or mean.  Default = parametric")
 	group.add_option("--statisticTest", type = "string", dest = "statisticTest", default = "Wald", help ="Satistic test to be used for the differential analysis. Two values possible: Wald or LRT.  Default = Wald")
+	group.add_option("--prefix", type = "string", dest = "prefix", default = "", help ="Prefix for each file output by the module.  Default = """)
+
 	parser.add_option_group(group)
+
 	# Return parser object
 	return parser
 
@@ -104,6 +108,7 @@ if options.buildContrast.upper() == "TRUE":
     commandBuilContrast.append("\""+options.model+"\"")
     commandBuilContrast.append(options.comparisonFile)
     commandBuilContrast.append("{0}-contrastFile.tsv".format(options.projectName))
+    commandBuilContrast.append(options.prefix)
     commandBuilContrast = " ".join(commandBuilContrast)
     command.append(commandBuilContrast)
     command.append(";")
@@ -129,6 +134,8 @@ if options.normDiffana.upper() == "TRUE":
 	commandNormDiffana.append(options.sizeFactorType)
 	commandNormDiffana.append(options.fitType)
 	commandNormDiffana.append(options.statisticTest)
+	commandNormDiffana.append(options.contrastFile)
+	commandBuilContrast.append(options.prefix)
 	commandNormDiffana = " ".join(commandNormDiffana)
 	command.append(commandNormDiffana)
 	command.append(") &> ")
