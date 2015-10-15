@@ -2,130 +2,176 @@ easy-contrasts-DESeq2
 =====================
 **Easy-contrast-DEseq2** is a module for analysis of count data from RNA-seq. It performs both Normalisation and Differential analysis using expression count files. This module uses the DESeq2 bioconductor R-package  and perform the construction of contrast vectors used by [DESeq2](http://www.bioconductor.org/packages/release/bioc/html/DESeq2.html).
 
+
+You will find in the [Beginner's guide to using the DESeq2 package](http://www.bioconductor.org/packages/2.14/bioc/vignettes/DESeq2/inst/doc/beginner.pdf) basic informations about DESeq2 and how produce expression files required by DESeq2.
+
+Note that Easy-contrasts-DESeq2 will be soon fully integrated to the [Eoulsan](https://github.com/genomicpariscentre/eoulsan) pipeline analysis.
+
+
 ##Use:
 Easy-contrast-DEseq2 can be used in 3 modes: classical mode, reference mode and contrast mode.
-To run the Easy-contrast-DEseq2 module you should make sure that the 3 scripts ( buildContrast.R, normDiffana.R,  runDESeq2.py ) are executable . For this open the terminal/console and use the **ls -l** command: 
+To run the Easy-contrast-DEseq2 module you should make sure that the 3 scripts (`buildContrast.R`, `normDiffana.R`, `runDESeq2.py`) are executable. For this open the terminal/console and use the `ls -l` command:
 ```
-I have no name!@b6b0df808204:/root$ ls -l
+$ ls -l
 -rwxrwxr-x 1 2743 users 10434 Jul 25 13:38 buildContrast.R
 -rwxrwxr-x 1 2743 users 29189 Jul 25 13:38 normDiffana.R
 -rwxrwxr-x 1 2743 users  6936 Jul 25 13:38 runDESeq2.py
-I have no name!@b6b0df808204:/root$
 ```
-You should have a 'x' at the end of the first expression for all the 3 files, as on this example. If you don't have this 'x' you must use the chmod command: 
+You should have three 'x' for the first expression for all the 3 files, as on this example. If you don't have this 'x' you must use the `chmod` command:
 ```
-I have no name!@b6b0df808204:/root$ chmod +x buildContrast.R normDiffana.R runDESeq2.py
-I have no name!@b6b0df808204:/root$
+$ chmod +x buildContrast.R normDiffana.R runDESeq2.py
 ```
-Now you can run the Easy-contrast-DEseq2 with the following command: 
+Now you can run the Easy-contrast-DEseq2 with the following command:
 ```
-./runDESeq2.py -m '~Condition'
+$ ./runDESeq2.py -m '~Condition'
 ```
 
 ###Options:
 All options available on the Easy-contrast-DEseq2 are presented here:
-  * **-m --model** : deseqModel, the only compulsory option. This option should contain the deseq formula (for more information please refer to the [DESeq2 documentation](http://www.bioconductor.org/packages/release/bioc/html/DESeq2.html) ).
-  * **-c --contrast** : TRUE/FALSE. If this option is set to “TRUE”, the differential analysis will be performed using contrast vectors. **Default=** FALSE.
-  * **-b --buildContrast** : TRUE/FALSE. If this option is set to “TRUE”, the comparisonFile.txt will be load and the buildContrast.R script will generate the 'projectName'-contrastFile.tsv file including the contrast vectors. **Default=** FALSE.
-  * **-f --designFile** : the name of the design file. **Default=** deseqDesign.txt.
-  * **-C --comparisonFile** : the name of the file including the comparison to be compute in contrast vector (see the Contrast file section). **Default=** comparisonFile.txt.
-  * **-n --normFig** : TRUE/FALSE. If this option is set to “FALSE”, figures from the normalization will be escaped. **Default=** TRUE.
-  * **-N --normDiffana** : TRUE/FALSE. If this option is set to “FALSE”, the normalization and differential analysis steps will be escaped. This option can be use to only build contrast vectors. **Default=** TRUE.
-  * **-d --diffanaFig** :  TRUE/FALSE. If this option is set to “FALSE”, figures from the differential analysis will be escaped. **Default=** TRUE.
-  * **-D --diffana** : TRUE/FALSE. If this option is set to “FALSE” , the differential analysis step will be escaped. **Default=** TRUE.
-  * **-p --projectName** : The name of the project. **Default=** exp1.
-  * **-H --expHeader** :  TRUE/FALSE. “TRUE” if the expression files have a header. **Default=** TRUE.
-  * **--sizeFactorsType** : ratio or iterate. Define the type of size factor estimation. **Default=** ratio.
-  * **--fitType** : parametric, local or mean. Define the type of dispertion estimation. **Default=** parametric.
-  * **--statisticTest** : Wald or LRT. Define the statistical test to be used for the differential analysis. **Default=** Wald.
+  * **-m --model**: deseqModel, the only compulsory option. This option should contain the deseq formula (for more information please refer to the [DESeq2 documentation](http://www.bioconductor.org/packages/release/bioc/html/DESeq2.html) ).
+  * **-c --contrast**: TRUE/FALSE. If this option is set to *“TRUE”*, the differential analysis will be performed using contrast vectors. **Default=**FALSE.
+  * **-b --buildContrast**: TRUE/FALSE. If this option is set to *“TRUE”*, the comparisonFile.txt will be load and the buildContrast.R script will generate the 'prefix'-'projectName'-contrastFile.tsv file including the contrast vectors. **Default=**FALSE.
+  * **-f --designFile**: the name of the design file. **Default=**`deseqDesign.txt`.
+  * **-C --comparisonFile**: the name of the file including the comparison to be compute in contrast vector (see the Contrast file section). **Default=**`comparisonFile.txt`.
+  * **-n --normFig**: TRUE/FALSE. If this option is set to *“FALSE”*, figures from the normalization will be escaped. **Default=**TRUE.
+  * **-N --normDiffana**: TRUE/FALSE. If this option is set to *“FALSE”*, the normalization and the differential analysis steps will be escaped. This option can be use to only build contrast vectors. **Default=**TRUE.
+  * **-d --diffanaFig**:  TRUE/FALSE. If this option is set to *“FALSE”*, figures from the differential analysis will be escaped. **Default=**TRUE.
+  * **-D --diffana**: TRUE/FALSE. If this option is set to *“FALSE”* , the differential analysis step will be escaped. **Default=**TRUE.
+  * **-p --projectName**: The name of the project. **Default=**exp1.
+  * **-H --countHeader**:  TRUE/FALSE. *“TRUE”* if the count files have a header. **Default=**TRUE.
+  * **--sizeFactorsType** : ratio or iterate. Define the type of size factor estimation. **Default=**ratio.
+  * **--fitType**: parametric, local or mean. Define the type of dispersion estimation. **Default=**parametric.
+  * **--statisticTest**: Wald or LRT. Define the statistical test to be used for the differential analysis. **Default=**Wald.
+  * **--prefix**:  A prefix that will be added to every files generated by the scripts. CAUSION: Cannot be a space, empty or a symbole. **Default=**prefix.
 
 ###Classical mode:
-The Classical mode performs the differential analysis on "Condition" column: all biological replicates are compared to each other.
-To run the Easy-contrast-DEseq2 module on the Classical mode, use the following command: 
+The Classical mode performs the differential analysis on *“Condition”* column: all biological replicates are compared to each other.
+To run the Easy-contrast-DEseq2 module on the Classical mode, use the following command:
 ```
-./runDESeq2.py -m '~Condition'
+$ ./runDESeq2.py -m '~Condition'
 ```
-For this mode you don't need options -c and -b, and you don't need the comparison file.
+For this mode you don't need options `-c` and `-b`, and you don't need the comparison file.
 
-###Reference mode: 
-The Reference mode performs the differential analysis on "Condition" column: all biological replicates are compared to the reference condition. You should specify the reference condition using the “true” value on the “Reference” column for the reference condition (see the Design file section).
-To run the Easy-contrast-DEseq2 module on the Reference mode, use the following command: 
+###Reference mode:
+The Reference mode performs the differential analysis on *“Condition”* column. To choose the references in the column *“Reference”* an integer corresponding to their reference priority.
+All biological replicates are compared to the reference conditions in order. For example: 
+
+Samples | Condition | Reference
+-----------|------------|--------------
+sample1 | WT1          | 1
+sample2 | WT2          | 2
+sample3 | KO1          | 3
+sample4 | KO2          | 0
+
+In this condition the first reference sample is 'sample1' the second is 'sample2' and the third is 'sample3'. The 'sample4' is not a reference because it is set at 0 in the reference column. You will have the following comparisons:
+
+WT2 vs WT1
+KO1 vs WT1
+KO2 vs WT1
+
+KO1 vs WT2
+KO2 vs WT2
+
+KO1 vs KO1
+
+
+To run the Easy-contrast-DEseq2 module on the Reference mode, use the following command:
 ```
-./runDESeq2.py -m '~Condition'
+$ ./runDESeq2.py -m '~Condition'
 ```
-For this mode you don't need options -c and -b, and you don't need the comparison file.
+For this mode you don't need options `-c` and `-b`, and you don't need the comparison file.
 
 ###Contrast mode:
-The Contrast mode  performs the differential analysis from the comparison file (see Comparison file section) using contrast vectors. 
-To run the Easy-contrast-DEseq2 module on the Contrast mode, use the following command: 
+The Contrast mode  performs the differential analysis from the comparison file (see Comparison file section) using contrast vectors.
+To run the Easy-contrast-DEseq2 module on the Contrast mode, use the following command:
 ```
-./runDESeq2.py -m '~type+day' -c TRUE -b TRUE
+$ ./runDESeq2.py -m '~type+day+type:day' -c TRUE -b TRUE
 ```
 
-##Installation: 
-This module was coded using R version 3.2.0, DESeq2 1.8.1, and two other R packages RcolorBrewer 1.1-2 and FactoMineR 1.28. 
-To use Easy-contrast-DEseq2 you should: 
+##Installation:
+This module was coded using R version 3.2.0, DESeq2 1.8.1, and two other R packages RcolorBrewer 1.1-2 and FactoMineR 1.28.
+To use Easy-contrast-DEseq2 you should:
   * Install the good version of R, and of all the packages
-  * Use the docker available on [genomicpariscentre/deseq2](https://registry.hub.docker.com/u/genomicpariscentre/deseq2/)
+  * Use the official Bioconductor docker image available on [bioconductor/release_sequencing](https://hub.docker.com/r/bioconductor/release_sequencing/). Easy-constrats-DESeq2 has been tested using the release 3.1 of Bioconductor.
   * Use the Dockerfile present in  Easy-contrast-DEseq2 to install the docker directly on your computer
 
 ##Input files:
-**CAUTION:** All file used by Easy-contrast-DEseq2 should be tabulated files.
 
-###Expression files: 
-Expression files should include a first column with names of the features (For example genes names, transcript ensembl id …) and a second column with counts. These expression files can include a header or not. This information should be specified into the options of the Easy-contrast-DEseq2.
+**CAUTION**: All the input files used by Easy-contrast-DEseq2 should be tabulated files.
+
+###Count files:
+Count files should include a first column with names of the features (For example genes names, transcript ensembl id…) and a second column with counts. These count files can include a header or not. This information should be specified by the option -H in Easy-contrast-DEseq2.
+Expression files can be generated using a dedicated tool like [htseq-count](http://www-huber.embl.de/users/anders/HTSeq/doc/count.html#count). You will find bellow an example of the beggining of an expression file.
+
+####Expression file example:
+
+```
+Id      Count
+ENST00000000233	569
+ENST00000000412	119
+ENST00000000442	25
+ENST00000001008	42
+ENST00000001146	0
+ENST00000002125	19
+...
+```
 
 ###Design file:
-The design file should include at least the following columns: Name, Condition, RepTechGroup, Reference and expressionFiles.
-  * *Name:* the names of your samples
-  * *Condition:* the biological replicates. All biological replicates should have the same condition name
-  * *RepTechGroup:* the technical replicates. All technical replicates should have the same RepTechGroup name to be pooled during the normalisation step
-  * *Reference:* the reference condition used for the differential analysis. All samples should have the “false” value in the Reference column except the reference that should have the “true” value. You can use the “true” value on all sample of the same biological replicates group (Condition column) or only on one. The result will be the same.
+The design file should include at least the following columns: *Name*, *Condition*, *RepTechGroup*, *Reference* and *expressionFiles*.
+  * **Name**: the names of your samples
+  * **Condition**: the biological replicates. All biological replicates should have the same condition name
+  * **RepTechGroup**: the technical replicates. All technical replicates should have the same RepTechGroup name to be pooled during the normalisation step
+  * **Reference**: the reference condition used for the differential analysis. 
 
-More columns can be used for the contrast mode (see the model design with column type and day)
-
-###Comparison file:
-The comparison file is used to generate the contrast vectors. It should include 2 columns: 
-  * the name of the comparison
-  * the formula of the comparison
-
-The comparison file must have **no header**. The formula of the comparison is constructed with the name of the column on the design file pasted to the name of the condition. Each “columncondition” should be separated by the “%” symbol to notify an association between  “columnconditions” and separated by the “\_vs\_” symbol to notify a comparison. 
+More columns can be used for the contrast mode (see the model design with column type and day).
+**CAUTION**: None of the values of the *Condition* or additional columns for the contrast mode must starts by a digit or a symbole.
 
 ####Model Design example:
 
 Name    |Condition |RepTechGroup |Reference |expressionFiles         |type |day
 --------|----------|-------------|----------|------------------------|-----|---
-sample1 |WT-day1a  |WT-day1      |false     |expression_WT-day1a.tsv |WT     |1
-sample2 |WT-day1b  |WT-day1      |false     |expression_WT-day1b.tsv |WT     |1
-sample3 |KO-day1a  |KO-day1      |false     |expression_KO-day1a.tsv |KO     |1
-sample4 |KO-day1b  |KO-day1      |false     |expression_KO-day1b.tsv |KO     |1
-sample5 |WT-day2a  |WT-day2      |false     |expression_WT-day2a.tsv |WT     |2
-sample6 |WT-day2b  |WT-day2      |false     |expression_WT-day2b.tsv |WT     |2
-sample7 |KO-day2a  |KO-day2      |false     |expression_KO-day2a.tsv |KO     |2
-sample8 |KO-day2b  |KO-day2      |false     |expression_KO-day2b.tsv |KO     |2
+sample1 |WT-day1a  |WT-day1      |0     |expression_WT-day1a.tsv |WT   |d1
+sample2 |WT-day1b  |WT-day1      |0     |expression_WT-day1b.tsv |WT   |d1
+sample3 |KO-day1a  |KO-day1      |0     |expression_KO-day1a.tsv |KO   |d1
+sample4 |KO-day1b  |KO-day1      |0     |expression_KO-day1b.tsv |KO   |d1
+sample5 |WT-day2a  |WT-day2      |0     |expression_WT-day2a.tsv |WT   |d2
+sample6 |WT-day2b  |WT-day2      |0     |expression_WT-day2b.tsv |WT   |d2
+sample7 |KO-day2a  |KO-day2      |0     |expression_KO-day2a.tsv |KO   |d2
+sample8 |KO-day2b  |KO-day2      |0     |expression_KO-day2b.tsv |KO   |d2
 
-With the deseq model: 
+With the DESeq2 model:
 ```
-~type+day
+~type+day+type:day
 ```
-We want to compare WT at the day 1 to WT at the day 2, the comparison formula will be: 
+We want to compare WT at the day 1 to WT at the day 2, the comparison formula will be:
 ```
-typeWT%day1_vs_typeWT%day2
+typeWT%dayd1_vs_typeWT%dayd2
 ```
-**CAUTION:** You have to respect the letter case from the design file 
+**CAUTION:** You have to respect the letter case from the design file
+
+###Comparison file:
+The comparison file is used to generate the contrast vectors. It should include 2 columns:
+  * the name of the comparison
+  * the formula of the comparison. **CAUSION**: The formula of the comparison is case sensible.
+
+The comparison file must have **no header**. The formula of the comparison is constructed with the name of the column on the design file pasted to the name of the condition. Each *“columncondition”* should be separated by the “%” symbol to notify an association between  *“columnconditions”* and separated by the “\_vs\_” symbol to notify a comparison.
+
+**CAUTION**: It is only possible to compare 2 conditions or 2 comparison of 2 conditions (e.g. the last line of the following comparison file example).
+
 
 ####Comparison file example:
 ```
-WT1_vs_KO1  typeWT%day1_vs_typeKO%day1
-WT2_vs_KO2  typeWT%day2_vs_typeKO%day2
-WT1_vs_WT2  typeWT%day1_vs_typeWT%day2
-KO1_vs_KO2  typeKO%day1_vs_typeKO%day2
-WT1vsKO1_vs_WT2vsKO2    typeWT%day1_vs_typeKO%day1_vs_typeWT%day2_vs_typeKO%day2
+WT1_vs_KO1  typeWT%dayd1_vs_typeKO%dayd1
+WT2_vs_KO2  typeWT%dayd2_vs_typeKO%dayd2
+WT1_vs_WT2  typeWT%dayd1_vs_typeWT%dayd2
+KO1_vs_KO2  typeKO%dayd1_vs_typeKO%dayd2
+WT1vsKO1_vs_WT2vsKO2    typeWT%dayd1_vs_typeKO%dayd1_vs_typeWT%dayd2_vs_typeKO%dayd2
 ```
+
 ##Output files:
 
 ###Log file:
-Easy-contrast-DEseq2 generates the 'projectName'-deseq2.log file. This file includes stdout and stderr information. All versions of R or packages and options are listed into the log file. All steps and comparisons are also listed into the log file.
+Easy-contrast-DEseq2 generates the `'projectName'-deseq2.log` file. This file includes stdout and stderr information. All versions of R or packages and options are listed into the log file. All steps and comparisons are also listed into the log file.
 
 ###Plots:
 Easy-contrast-DEseq2 generates:
@@ -138,23 +184,121 @@ Normalisation                   |Differential analysis
 unpooled clustering             |dispersion plot
 unpooled PCA                    |
 null counts barplot             |p-valur plot
-unpooled counts barplot         |adjusted p-value plot 
+unpooled counts barplot         |adjusted p-value plot
 unpooled counts boxplot         |MA plot
 pooled counts barplot           |differentially expressed features according p-value
 pooled counts boxplot           |
-pooled and normalised clustering|
-pooled and normalised PCA       |
-pooled and normalised boxplot   |
+pooled and normalized clustering|
+pooled and normalized PCA       |
+pooled and normalized boxplot   |
 most expressed features plot    |
 
 ###Matrix:
 Easy-contrast-DEseq2 generates:
-   * 3 matrix during the Normalisation: raw counts matrix, pooled counts matrix, normalised counts matrix
+   * 3 matrix during the Normalisation: raw counts matrix, pooled counts matrix, normalized counts matrix
    * 1 matrix for each comparison during the Differential analysis
 
-###Contrast file: 
-This file is generated only with the -b option and includes:
+###Contrast file:
+This file is generated only with the `-b` option and includes:
    * the name of the comparison
-   * the formula of the comparison 
-   * the contrast vector of the comparison 
-This file is loaded during the differential analysis with the -c option
+   * the formula of the comparison
+   * the contrast vector of the comparison
+This file is loaded during the differential analysis with the `-c` option.
+
+Example of a `'prefix'-'projectName'-contrastFile.tsv` generated by easy-contrasts-DESeq2:
+```
+name                    comparisons                                                 matrix
+WT1_vs_KO1              typeWT%dayd1_vs_typeKO%dayd1                                    (0,1,-1,0,0,1,-1,0,0)
+WT2_vs_KO2              typeWT%dayd2_vs_typeKO%dayd2                                    (0,1,-1,0,0,0,0,1,-1)
+WT1_vs_WT2              typeWT%dayd1_vs_typeWT%dayd2                                    (0,0,0,0,0,1,-1,0,0)
+KO1_vs_KO2              typeKO%dayd1_vs_typeKO%dayd2                                    (0,0,0,0,0,0,0,1,-1)
+WT1vsKO1_vs_WT2vsKO2    typeWT%dayd1_vs_typeKO%dayd1_vs_typeWT%dayd2_vs_typeKO%dayd2    (0,0,0,0,0,1,-1,-1,1)
+```
+
+**TIP**: Usually, the sum of a contrast vector is equals to 0. Warning: it is not always true but for a classical use, it is often the case.
+
+**WARNING**: The contrast vector is not correct if there are values greater than 1 in the contrast vector.
+
+
+
+
+###Log file:
+
+####Warning when building DESeq2 object
+
+```
+Warning message:
+In DESeqDataSet(se, design = design, ignoreRank) :
+  some variables in design formula are characters, converting to factors
+```
+
+It is an expected warning because the R script change the type of the data from vectors to factors.
+
+
+```
+Warning messages:
+1: In estimateDispersionsFit(object, fitType = fitType, quiet = quiet) :
+  the parametric fit of dispersion estimates over the mean of counts
+failed, which occurs when the trend is not well captured by the
+function y = a/x + b. A local regression fit is automatically performed,
+and the analysis can continue. You can specify fitType='local' or 'mean'
+to avoid this message if re-running the same data.
+When using local regression fit, the user should examine plotDispEsts(dds)
+to make sure the fitted line is not sharply curving up or down based on
+the position of individual points.
+2: In lfproc(x, y, weights = weights, cens = cens, base = base, geth = geth,  :
+  Estimated rdf < 1.0; not estimating variance
+```
+
+It is an expected message because of the random matrix sent to DESeq2 to generate beta factors.
+
+
+####Warning of the first plot
+
+```
+(process:64): GLib-WARNING **: getpwuid_r(): failed due to unknown user id (2743)
+
+Ce warning est du au docker est n'a aucune influence sur le bon déroulement de l'analyse.
+[modifier] Warning lors de l'estimation de la dispersion
+```
+
+This message appears when you use a Docker container and when no user is related to the uid used to launch R. This have no consequences on the analysis.
+
+```
+8 - Normalisation
+      Fig 8 - Pooled and Normalised clustering
+      Fig 9 - Pooled and Normalised PCA
+      Fig 10 - Pooled and Normalised boxplot
+      Fig 11 - Most expressed features plot
+null device
+          1
+Warning messages:
+1: glm.fit: algorithm did not converge
+2: In log(ifelse(y == 0, 1, y/mu)) : NaNs produced
+3: step size truncated due to divergence
+4: In log(ifelse(y == 0, 1, y/mu)) : NaNs produced
+5: step size truncated due to divergence
+6: glm.fit: algorithm did not converge
+7: In estimateDispersionsFit(object, quiet = TRUE) :
+  the parametric fit of dispersion estimates over the mean of counts
+failed, which occurs when the trend is not well captured by the
+function y = a/x + b. A local regression fit is automatically performed,
+and the analysis can continue. You can specify fitType='local' or 'mean'
+to avoid this message if re-running the same data.
+When using local regression fit, the user should examine plotDispEsts(dds)
+to make sure the fitted line is not sharply curving up or down based on
+the position of individual points.
+9 - Saving of normalisedCountMatrix
+10 - Dispersion estimations
+```
+
+Here some samples are very close (e.g. when 2 conditions has no differentially expressed genes). So DESeq2 automatically change the *“fitType”* parameter of the *estimateDispersions* function to get a better estimation of the dispersion. *WARNING*: this warning appears in the log file before the start of the dispersion estimation due to a printing bug.
+
+####Warning at the end of the analysis
+
+```
+There were 50 or more warnings (use warnings() to see the first 50)
+```
+
+Do no care about this warnings.
+
