@@ -105,7 +105,7 @@ if options.buildContrast.upper() == "TRUE":
     commandBuilContrast = []
     commandBuilContrast.append("./buildContrast.R")
     commandBuilContrast.append(options.designFile)
-    commandBuilContrast.append("\""+options.model+"\"")
+    commandBuilContrast.append("\""+options.model.replace(' ','')+"\"")
     commandBuilContrast.append(options.comparisonFile)
     commandBuilContrast.append("{0}-contrastFile.tsv".format(options.projectName))
     commandBuilContrast.append(options.prefix)
@@ -128,7 +128,7 @@ if options.normDiffana.upper() == "TRUE":
         commandNormDiffana.append(options.contrast.upper())
 
 	commandNormDiffana.append(options.designFile)
-	commandNormDiffana.append("\""+options.model+"\"")
+	commandNormDiffana.append("\""+options.model.replace(' ','')+"\"")
 	commandNormDiffana.append(options.projectName)
 	commandNormDiffana.append(options.expHeader)
 	commandNormDiffana.append(options.sizeFactorType)
