@@ -1,12 +1,12 @@
 
 ![License: GNU GPL 2.1](https://img.shields.io/badge/License-GNU_GPL--v2.1-lightgray?logo=GPLv3&logoColor=white)
 ![Written in R](https://img.shields.io/badge/Written_in-R-dodgerblue?logo=R&logoColor=white)
-[![Container: Docker](https://img.shields.io/badge/Docker-V2.0-cyan?logo=docker&logoColor=white)](LINK_TO_ADD)
+[![Container: Docker](https://img.shields.io/badge/Docker-2.0-cornflowerblue?logo=docker&logoColor=white)](https://hub.docker.com/r/genomicpariscentre/easycontrasts)
 ![Version 2.0](https://img.shields.io/badge/Version-V2.0-green4)
 
 # easy-contrasts-DESeq2
 
-**Easy-contrast-DEseq2** is a module to analyse count data from bulk RNA-Sequencing experiments. It performs quality control, normalisation and differential analysis using the expression count files as input. This module uses the `DESeq2` bioconductor R package. You will find in the [Beginner's guide to using the DESeq2 package](http://www.bioconductor.org/packages/2.14/bioc/vignettes/DESeq2/inst/doc/beginner.pdf) basic informations about `DESeq2` and how produce the expression files it requires.
+**Easy-contrast-DESeq2** is a module to analyse count data from bulk RNA-Sequencing experiments. It performs quality control, normalisation and differential analysis using the expression count files as input. This module uses the `DESeq2` bioconductor R package. You will find in the [Beginner's guide to using the DESeq2 package](http://www.bioconductor.org/packages/2.14/bioc/vignettes/DESeq2/inst/doc/beginner.pdf) basic informations about `DESeq2` and how produce the expression files it requires.
 
 This module is part of the [Eoulsan](https://github.com/genomicpariscentre/eoulsan) pipeline analysis.
 
@@ -50,7 +50,7 @@ docker run \
 -v /:/ \
 -w $(readlink -f .) \
 -u $(id -u):$(id -g) \
-name_of_a_docker_image \
+genomicpariscentre/easycontrasts:2.0 \
 Rscript -e "rmarkdown::render(
     input = '01_normDiffana.Rmd',
     output_file = 'myProject.html',
@@ -220,4 +220,6 @@ stringr                |  1.5.2
 SummarizedExperiment   |  1.38.0
 
 
-A Docker container containing all the packages of interest along with their dependencies is available at **XXX**.
+A Docker container containing all the packages of interest along with their dependencies is available at:
+
+(https://hub.docker.com/r/genomicpariscentre/easycontrasts)[https://hub.docker.com/r/genomicpariscentre/easycontrasts] (Version 2.0)

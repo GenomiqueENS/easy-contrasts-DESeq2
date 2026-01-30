@@ -403,8 +403,8 @@ for(i in c(1:nrow(comparison_df))) {
   
   # Figure subtitle
   comparison_subtitle = stringr::str_replace(string = comparison_name,
-                                             pattern = "_vs_",
-                                             replacement = " vs ")
+                                             pattern = "_",
+                                             replacement = " ")
   
   # Section title
   cat("\n##", comparison_subtitle, "\n")
