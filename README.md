@@ -47,15 +47,17 @@ Either render the main `01_normDiffana.Rmd` document within RStudio, or use the 
 ```{bash}
 docker run \
 -ti --rm \
--v /:/ \
+-v $(readlink -f .):$(readlink -f .) \
 -w $(readlink -f .) \
 -u $(id -u):$(id -g) \
 genomicpariscentre/easycontrasts:2.0 \
 Rscript -e "rmarkdown::render(
     input = '01_normDiffana.Rmd',
-    output_file = 'myProject.html',
-    params = list(projectName = 'myProject',
-                  moreParameter = parameterValue))"
+    output_file = 'GSE107401.html',
+    params = list(projectName = 'GSE107401',
+                  designPath = './project_GSE107401/deseq2_GSE107401-deseq2Design.txt',
+                  comparisonPath = './project_GSE107401/deseq2_GSE107401-comparisonFile.txt',
+                  prefix = './project_GSE107401/deseq2_'))"
 ```
 
 ## Input parameters
