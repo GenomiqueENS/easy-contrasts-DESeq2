@@ -417,6 +417,17 @@ matrix(zscore_mat[, c(1:2)],
   kableExtra::kable_styling(full_width = FALSE)
 ```
 
+In case a gene is expressed in a single sample, the normalisation outputs NaN values. We remove them.
+
+```{r remove_NaN}
+NaN_rows = (which(rowSums(is.nan(zscore_mat)) > 0))
+
+if (length(NaN_rows) > 0) {
+  nb_genes = nb_genes - length(NaN_rows)
+  zscore_mat = zscore_mat[-(NaN_rows), ]
+}
+```
+
 On the heatmap, each gene is one row and each sample is one column. Samples are annotated for their condition. The sample dendrogram is calculated based on the distances between samples considering only the genes represented on the heatmap. The condition associated to each sample is not considered by the method (unsupervised method). The genes dendrogram is calculated based on the Z-score of that gene among all samples.
 
 ```{r heatmap_height, echo = FALSE}
@@ -451,7 +462,7 @@ if (complexMode) {
   
   # Annotation
   ha_top = ComplexHeatmap::HeatmapAnnotation(
-    Condition = sub_design,
+    df = sub_design,
     col = list(Condition = setNames(nm = c(condition1, condition2),
                                     c("#3AA5C1", "#FF6800")),
                SubCondition = colors_condition[unique(sub_design$SubCondition)]),
@@ -484,7 +495,7 @@ if (nb_genes > 1) {
 ht = ComplexHeatmap::Heatmap(
   as.matrix(zscore_mat),
   # Expression colors
-  col = expressionColors(range(zscore_mat)),
+  col = expressionColors(range(zscore_mat, na.rm = TRUE)),
   heatmap_legend_param = list(title = "Z-score"),
   # Annotation
   top_annotation = ha_top,
