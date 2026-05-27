@@ -63,7 +63,7 @@ Rscript -e "rmarkdown::render(
 
 ## Input parameters
 
-They are represented in orange (except `complexMode` which is internally determined when there is no `Reference` column in the design file) on the pipeline overview.
+They are represented in orange (except `complexMode` which is internally determined, and set to `TRUE` when there is no `Reference` column in the design file) on the pipeline overview.
 
 Parameter | Default value | Definition
 ----------|---------------|--------------
@@ -73,13 +73,16 @@ comparisonPath    |  NULL                          |  path to the comparison fil
 diffanaTest       |  TRUE                          |  Whether to perform the differential expression analysis or not
 expHeader         |  TRUE                          |  Whether the design table has a header or not
 deseqModel        |  "~Condition"                  |  DESeq2 model
+nestedModel       |  NULL                          |  Whether to perform a test of nested models (NULL: automatic determination based on the DESeq2 model)
 sizeFactorType    |  "ratio"                       |  Size factor type
 fitType           |  "parametric"                  |  Fit type
 statisticTest     |  "Wald"                        |  Statistic test
 weightContrast    |  FALSE                         |  Whether to weight the contrast vector by the number of samples or not*
-prefix            |  "./deseq2_"                     |  Prefix to save the output TSV files
+padjLimit         |  0.05                          |  Adjusted p-value threshold to consider a gene as differentially expressed
+log2FCLimit       |  2                             |  Absolute log2 fold-change threshold to consider a gene as differentially expressed
+prefix            |  "./deseq2_"                   |  Prefix to save the output TSV files
 plotInteractive   |  FALSE                         |  Whether to make interactive volcano plots or not
-logoUrl           |  "logo-GenomiqueENS-90pxh.png" | Link to the logo displayed in the top left corner of the output document
+logoUrl           |  "logo-GenomiqueENS-90pxh.png" |  Link to the logo displayed in the top left corner of the output document
 authorName        |  "Eoulsan"                     |  Name of the author, for the bottom left corner of the document
 authorMail        |  "eoulsan@biologie.ens.fr"     |  Mail of the author, for the bottom left corner of the document
 leaveOnError      |  TRUE                          |  Whether to stop the rendering in case of error

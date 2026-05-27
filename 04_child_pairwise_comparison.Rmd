@@ -151,14 +151,14 @@ ggplot2::ggplot(res, aes(x = padj)) +
 
 ### MA plot
 
-The MA plot represents the log<sub>2</sub> fold change of each gene (dot) as a function of their mean normalised expression value across all samples. Dots are colored based on the significance of the statistical test, using a significant threshold of 0.05 for the adjusted p-value (`padj`).
+The MA plot represents the log<sub>2</sub> fold change of each gene (dot) as a function of their mean normalised expression value across all samples. Dots are colored based on the significance of the statistical test, using a significant threshold of **`r padjLimit`** for the adjusted p-value (`padj`).
 
 ```{r fig-diffana_MA_plot, fig.width = 10, fig.height = 6}
 ggplot2::ggplot(res, aes(x = baseMean, y = log2FoldChange,
-                         col = padj < 0.05)) +
+                         col = padj < padjLimit)) +
   ggplot2::geom_point(size = 1) +
   ggplot2::geom_hline(yintercept = 0, lty = 1, col = "lightgray") +
-  ggplot2::scale_color_manual(name = "padj < 0.05",
+  ggplot2::scale_color_manual(name = paste0("padj < ", padjLimit),
                               breaks = c(FALSE, TRUE, NA),
                               values = c("black", "#D32A24", "lightgray"),
                               na.value = "lightgray") +
@@ -279,23 +279,20 @@ p
 The volcano plot represents the adjusted p-value as a function of the log<sub>2</sub> fold change between condition **`r condition1`** and condition **`r condition2`**. We label a maximum of 10 genes in both directions. We identify such genes.
 
 ```{r genes_for_volcano_plot}
-padj_threshold = 0.05
-log2FC_threshold = 2
-
 genes_up = res %>%
-  dplyr::filter(padj < padj_threshold) %>%
+  dplyr::filter(padj < padjLimit) %>%
   dplyr::filter(log2FoldChange > 0) %>%
   dplyr::top_n(n = 10, wt = log2FoldChange) %>%
   dplyr::pull(ID)
 
 genes_dn = res %>%
-  dplyr::filter(padj < padj_threshold) %>%
+  dplyr::filter(padj < padjLimit) %>%
   dplyr::filter(log2FoldChange < 0) %>%
   dplyr::top_n(n = 10, wt = -log2FoldChange) %>%
   dplyr::pull(ID)
 ```
 
-We label **`r length(genes_up)`** significantly over-regulated and **`r length(genes_dn)`** significantly down-regulated genes, considering an adjusted p-value of `r padj_threshold`.
+We label **`r length(genes_up)`** significantly over-regulated and **`r length(genes_dn)`** significantly down-regulated genes, considering an adjusted p-value of **`r padjLimit`**.
 
 ```{r volcano_prep, class.source = "fold-hide"}
 non_zero_min = min(res$padj[res$padj != 0], na.rm = TRUE)
@@ -311,24 +308,24 @@ p = ggplot2::ggplot(res %>% dplyr::filter(!is.na(padj)),
                                       "adjusted p-value: ", round(padj, 4)))) +
   # Lines
   ggplot2::geom_hline(yintercept = 0, col = "lightgray") +
-  ggplot2::geom_hline(yintercept = -log10(padj_threshold), lty = 2, col = "#A3ADB8") +
-  ggplot2::geom_vline(xintercept = log2FC_threshold, lty = 2, col = "#A3ADB8") +
-  ggplot2::geom_vline(xintercept = -log2FC_threshold, lty = 2, col = "#A3ADB8") +
+  ggplot2::geom_hline(yintercept = -log10(padjLimit), lty = 2, col = "#A3ADB8") +
+  ggplot2::geom_vline(xintercept = log2FCLimit, lty = 2, col = "#A3ADB8") +
+  ggplot2::geom_vline(xintercept = -log2FCLimit, lty = 2, col = "#A3ADB8") +
   # Points
   ggplot2::geom_point(data = res %>%
-                        dplyr::filter(padj >= padj_threshold),
+                        dplyr::filter(padj >= padjLimit),
                       mapping = aes(col = "Others")) +
   ggplot2::geom_point(data = res %>%
-                        dplyr::filter(log2FoldChange > -log2FC_threshold &
-                                        log2FoldChange < log2FC_threshold),
+                        dplyr::filter(log2FoldChange > -log2FCLimit &
+                                        log2FoldChange < log2FCLimit),
                       mapping = aes(col = "Others")) +
   ggplot2::geom_point(data = res %>%
-                        dplyr::filter(padj < padj_threshold) %>%
-                        dplyr::filter(log2FoldChange >= log2FC_threshold),
+                        dplyr::filter(padj < padjLimit) %>%
+                        dplyr::filter(log2FoldChange >= log2FCLimit),
                       mapping = aes(col = "Significantly up-regulated")) +
   ggplot2::geom_point(data = res %>%
-                        dplyr::filter(padj < padj_threshold) %>%
-                        dplyr::filter(log2FoldChange <= -log2FC_threshold),
+                        dplyr::filter(padj < padjLimit) %>%
+                        dplyr::filter(log2FoldChange <= -log2FCLimit),
                       mapping = aes(col = "Significantly down-regulated")) +
   ggplot2::scale_color_manual(name = "genes",
                               values = c("#D32A24", "#224897", "#A3ADB8"),

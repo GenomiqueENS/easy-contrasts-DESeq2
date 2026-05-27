@@ -1,6 +1,7 @@
 # Related to the tests
 **html
 project_*
+.Rhistory
 
 # Related to the environmnent
 env/20**

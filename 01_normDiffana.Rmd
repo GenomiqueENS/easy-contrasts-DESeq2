@@ -6,10 +6,13 @@ params:
   diffanaTest: TRUE
   expHeader: TRUE
   deseqModel: "~Condition"
+  nestedModel: NULL
   sizeFactorType: "ratio"
   fitType: "parametric"
   statisticTest: "Wald"
   weightContrast: FALSE
+  padjLimit: 0.05
+  log2FCLimit: 2
   prefix: "./deseq2_"
   plotInteractive: TRUE
   logoUrl: "https://www.outils.genomique.biologie.ens.fr/eoulsan/images/eoulsan.png"
@@ -649,6 +652,44 @@ buildContrast = function(dds,
   
   return(output)
 }
+
+# -----------------------------------------------------------------------------
+# missingSubstring
+# Identify and color the variable of interest in the context of nested models
+#
+# Input:
+#   A : the text behind a formula
+#   B : the text behind a formula
+#
+# Output:
+#   A_color : A, with in red, the substring from A which is absent in B
+# -----------------------------------------------------------------------------
+missingSubstring = function(A, B) {
+  # Remove the ~
+  A = base::substr(x = A, start = 2, stop = nchar(A))
+  B = base::substr(x = B, start = 2, stop = nchar(B))
+  
+  # Split by +
+  A_split = stringr::str_split(string = A,
+                               pattern = "\\+")[[1]]
+  
+  B_split = stringr::str_split(string = B,
+                               pattern = "\\+")[[1]]
+  
+  # Difference
+  id_absent_in_B = which(!(A_split %in% B_split))
+  colored_substring = paste0("<span style='color:red'>",
+                             A_split[id_absent_in_B],
+                             "</span>")
+  
+  # Rebuild A
+  A_color = stringr::str_replace(string = A,
+                                 pattern = A_split[id_absent_in_B],
+                                 replacement = colored_substring)
+  A_color = paste0("~", A_color)
+  
+  return(A_color)
+}
 ```
 
 These functions are listed below.
@@ -670,10 +711,13 @@ comparisonPath  = params$comparisonPath
 diffanaTest     = as.logical(toupper(params$diffanaTest))
 expHeader       = as.logical(toupper(params$expHeader))
 deseqModel      = params$deseqModel
+nestedModel     = params$nestedModel
 sizeFactorType  = params$sizeFactorType
 fitType         = params$fitType
 statisticTest   = params$statisticTest
 weightContrast  = params$weightContrast
+padjLimit       = params$padjLimit
+log2FCLimit     = params$log2FCLimit
 plotInteractive = params$plotInteractive
 leaveOnError    = params$leaveOnError
 saveRDS         = params$saveRDS
@@ -685,10 +729,13 @@ c("Project name (projectName)" = projectName,
   "Whether to perform the differential expression analysis or not (diffanaTest)" = diffanaTest,
   "Whether the design table has a header or not (expHeader)" = expHeader,
   "DESeq2 model (deseqModel)" = deseqModel,
+  "Whether to perform a test of nested models (nestedModel)" = nestedModel,
   "Size factor type (sizeFactorType)" = sizeFactorType,
   "Fit type (fitType)" = fitType,
   "Statistic test (statisticTest)" = statisticTest,
   "Whether to weight the contrast vector by the number of samples or not (weightContrast)" = weightContrast,
+  "Adjusted p-value threshold to consider a gene as differentially expressed (padjLimit)" = padjLimit,
+  "Absolute log2 fold-change threshold to consider a gene as differentially expressed (log2FCLimit)" = log2FCLimit,
   "Prefix to save files (prefix)" = prefix,
   "Whether to make interactive plots or not (plotInteractive)" = plotInteractive,
   "Whether to stop the rendering in case of error (leaveOnError)" = leaveOnError,
@@ -957,7 +1004,7 @@ if (tech_rep_present) {
 } else {
   the_message = "In this context, there is no technical replicate."
   
-  # Anyway, we change the sample labels to the biological meaningful ones.
+  # Anyway, we change the sample labels to the biologically meaningful ones.
   dds = DESeq2::collapseReplicates(dds,
                                    groupby = dds$RepTechGroup)
 }
@@ -1150,6 +1197,34 @@ dplyr::left_join(x = data.frame(sample = names(maxCounts),
                  legend.background = ggplot2::element_blank())
 ```
 
+<!-- Conditional execution in case the formula contains more than 2 terms -->
+
+```{r check_nested_models, results = 'asis', echo = FALSE}
+all_terms = base::strsplit(x = deseqModel,
+                           split = "[~+*:]") %>%
+  unlist() %>%
+  .[. != ""] %>%
+  unique()
+
+if (is.null(nestedModel)) {
+  nestedModel = (length(all_terms) > 1)
+}
+
+if (nestedModel & length(all_terms) == 1) {
+  nestedModel = FALSE
+  
+  cat("# Nested models evaluation\n\n")
+  cat("<span style='color:red;'>The `nestedModel` parameter is set to TRUE but there is only one term in the formula. The step is skipped.</span>\n")
+}
+```
+
+```{r nested_models, echo = FALSE, results = 'asis', eval = nestedModel}
+res = knitr::knit_child(
+  input = '05_child_nested_models.Rmd',
+  quiet = TRUE)
+
+cat(res, sep = '\n')
+```
 
 <!-- Conditional execution in case differential expression analysis should be done -->
 
