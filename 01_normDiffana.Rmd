@@ -16,6 +16,7 @@ params:
   authorName: "Eoulsan"
   authorEmail: "eoulsan@bio.ens.psl.eu"
   leaveOnError: TRUE
+  saveRDS: TRUE
 title: "<center>Differential expression analysis</center>"
 subtitle: "<center>`r paste0('Project: ', params$projectName)`</center>"
 date: "`r invisible(Sys.setlocale('LC_TIME', 'C')) ; paste0('Analysis run on: ', format(Sys.time(), '%d %B %Y'))`
@@ -675,6 +676,7 @@ statisticTest   = params$statisticTest
 weightContrast  = params$weightContrast
 plotInteractive = params$plotInteractive
 leaveOnError    = params$leaveOnError
+saveRDS         = params$saveRDS
 
 # Display them as a table
 c("Project name (projectName)" = projectName,
@@ -689,7 +691,8 @@ c("Project name (projectName)" = projectName,
   "Whether to weight the contrast vector by the number of samples or not (weightContrast)" = weightContrast,
   "Prefix to save files (prefix)" = prefix,
   "Whether to make interactive plots or not (plotInteractive)" = plotInteractive,
-  "Whether to stop the rendering in case of error (leaveOnError)" = leaveOnError) %>%
+  "Whether to stop the rendering in case of error (leaveOnError)" = leaveOnError,
+  "Whether to save the data as RDS files (saveRDS)" = saveRDS) %>%
   data.frame(Parameter = names(.),
              Value     = .,
              row.names = NULL) %>%
@@ -825,6 +828,15 @@ saveRawCountMatrix(dds,
 ```
 
 Output file name:<br>*`r filename`*
+
+```{r save_count_matrix_rds, eval = saveRDS, results = 'asis'}
+cat("We also save the object in RDS format. The file name is the same. The extension is '.rds'.\n")
+
+saveRDS(dds,
+        file = stringr::str_replace(string = filename,
+                                    pattern = "tsv$",
+                                    replacement = "rds"))
+```
 
 # Quality control
 
@@ -995,6 +1007,15 @@ saveTable(DESeq2::counts(dds, normalized = TRUE),
 ```
 
 Output file name:<br>*`r filename`*
+
+```{r save_norm_count_matrix_rds, eval = saveRDS, results = 'asis'}
+cat("We also save the object in RDS format. The file name is the same. The extension is '.rds'.\n")
+
+saveRDS(dds,
+        file = stringr::str_replace(string = filename,
+                                    pattern = "tsv$",
+                                    replacement = "rds"))
+```
 
 ## Visualisation {#normalisation_visu}
 

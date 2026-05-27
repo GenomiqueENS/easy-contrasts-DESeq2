@@ -2,7 +2,7 @@
 ![License: GNU GPL 2.1](https://img.shields.io/badge/License-GNU_GPL--v2.1-lightgray?logo=GPLv3&logoColor=white)
 ![Written in R](https://img.shields.io/badge/Written_in-R-dodgerblue?logo=R&logoColor=white)
 [![Container: Docker](https://img.shields.io/badge/Docker-2.0-cornflowerblue?logo=docker&logoColor=white)](https://hub.docker.com/r/genomicpariscentre/easycontrasts)
-![Version 2.1](https://img.shields.io/badge/Version-V2.1-green4)
+![Version 2.2](https://img.shields.io/badge/Version-V2.2-green4)
 
 # easy-contrasts-DESeq2
 
@@ -57,18 +57,19 @@ Rscript -e "rmarkdown::render(
     params = list(projectName = 'GSE107401',
                   designPath = './project_GSE107401/deseq2_GSE107401-deseq2Design.txt',
                   comparisonPath = './project_GSE107401/deseq2_GSE107401-comparisonFile.txt',
+                  deseqModel = '~Condition+FooBar+Condition:FooBar',
                   prefix = './project_GSE107401/deseq2_'))"
 ```
 
 ## Input parameters
 
-They are represented in orange (except `complexMode` which is internally determined) on the pipeline overview.
+They are represented in orange (except `complexMode` which is internally determined when there is no `Reference` column in the design file) on the pipeline overview.
 
 Parameter | Default value | Definition
 ----------|---------------|--------------
-projectName       |  "Experiment1"                             |  name of the project, display in the titles (document, figures)
-designPath        |  "deseq2_Experiment1-deseq2Design.txt"     |  path to the design file
-comparisonPath    |  "deseq2_Experiment1-comparisonFile.txt"   |  path to the comparison file*
+projectName       |  "Project"                     |  name of the project, display in the titles (document, figures)
+designPath        |  NULL                          |  path to the design file
+comparisonPath    |  NULL                          |  path to the comparison file*
 diffanaTest       |  TRUE                          |  Whether to perform the differential expression analysis or not
 expHeader         |  TRUE                          |  Whether the design table has a header or not
 deseqModel        |  "~Condition"                  |  DESeq2 model
@@ -76,12 +77,13 @@ sizeFactorType    |  "ratio"                       |  Size factor type
 fitType           |  "parametric"                  |  Fit type
 statisticTest     |  "Wald"                        |  Statistic test
 weightContrast    |  FALSE                         |  Whether to weight the contrast vector by the number of samples or not*
-prefix            |  "deseq2_"                     |  Prefix to save the output TSV files
+prefix            |  "./deseq2_"                     |  Prefix to save the output TSV files
 plotInteractive   |  FALSE                         |  Whether to make interactive volcano plots or not
 logoUrl           |  "logo-GenomiqueENS-90pxh.png" | Link to the logo displayed in the top left corner of the output document
 authorName        |  "Eoulsan"                     |  Name of the author, for the bottom left corner of the document
 authorMail        |  "eoulsan@biologie.ens.fr"     |  Mail of the author, for the bottom left corner of the document
 leaveOnError      |  TRUE                          |  Whether to stop the rendering in case of error
+saveRDS           |  TRUE                          |  WWhether to save the data as RDS files
 
 *: The `comparisonPath` and `weightContrast` are considered only when `complexMode` is TRUE.
 
