@@ -1,0 +1,7 @@
+SampleId	Name	expressionFile	RepTechGroup	Condition	FooBar
+GSM2866303	GSM2866303	./project_GSE107401/GSM2866303_expression_output_expression_20130270.tsv	WT1	WT	FOO
+GSM2866304	GSM2866304	./project_GSE107401/GSM2866304_expression_output_expression_20130271.tsv	WT2	WT	FOO
+GSM2866305	GSM2866305	./project_GSE107401/GSM2866305_expression_output_expression_20130272.tsv	WT3	WT	BAR
+GSM2866306	GSM2866306	./project_GSE107401/GSM2866306_expression_output_expression_20130267.tsv	KO1	KO	FOO
+GSM2866307	GSM2866307	./project_GSE107401/GSM2866307_expression_output_expression_20130268.tsv	KO2	KO	BAR
+GSM2866308	GSM2866308	./project_GSE107401/GSM2866308_expression_output_expression_20130269.tsv	KO3	KO	BAR
