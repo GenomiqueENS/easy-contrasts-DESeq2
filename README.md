@@ -2,7 +2,7 @@
 ![License: GNU GPL 2.1](https://img.shields.io/badge/License-GNU_GPL--v2.1-lightgray?logo=GPLv3&logoColor=white)
 ![Written in R](https://img.shields.io/badge/Written_in-R-dodgerblue?logo=R&logoColor=white)
 [![Container: Docker](https://img.shields.io/badge/Docker-2.0-cornflowerblue?logo=docker&logoColor=white)](https://hub.docker.com/r/genomicpariscentre/easycontrasts)
-![Version 2.2](https://img.shields.io/badge/Version-V2.2-green4)
+![Version 2.3](https://img.shields.io/badge/Version-V2.3-green4)
 
 # easy-contrasts-DESeq2
 
