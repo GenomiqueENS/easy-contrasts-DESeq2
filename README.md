@@ -12,12 +12,13 @@ This module is part of the [Eoulsan](https://github.com/genomicpariscentre/eouls
 
 ## Overview
 
-The module is made of 4 RMarkdown files:
+The module is made of 5 RMarkdown files:
 
 * 01_normDiffana.Rmd
 * 02_child_collapse_replicates.Rmd (02 in the diagram)
 * 03_child_differential_expression.Rmd (03 in the diagram)
 * 04_child_pairwise_comparison.Rmd (04 in the diagram)
+* 05_child_nested_models.Rmd (05 in the diagram)
 
 <p align="center">
 <img src="./pipeline_overview.jpg?raw=true" alt="pipeline_overview" width="70%"/>
@@ -31,7 +32,7 @@ Notes, for the diagram:
 (4) Add more columns to the design file, but explain them in the *Data preparation > Load metadata* section.
 
 
-The three child files are conditionally executed within the main document based on parameter values:
+The four child files are conditionally executed within the main document based on parameter values:
 
 - The file `02_child_collapse_replicates.Rmd` is executed when there are at least two rows (samples) in the design file with the same value in the `RepTechGroup` column. It is executed only once.
 - The file `03_child_differential_expression.Rmd` is executed when the input parameter `diffanaTest` is set to TRUE. It is executed only once.
@@ -39,6 +40,8 @@ The three child files are conditionally executed within the main document based 
     * **Simple mode**: There are at least two distinct values in the `Reference` column of the design file.
     * **Complex mode**: There are comparisons in the comparison file, that match the ones automatically identified based on the provided formula (`deseqModel`) and that lead to unique constrast vectors.<br>
     This file is executed as many times as there are pairwise comparisons.
+- The file `05_child_nested_models.Rmd` is executed when the parameter `nestedModels` is not NULL and when there is at least two variables being considering in the formula (`deseqModel`).
+
 
 ## Use
 
@@ -57,6 +60,7 @@ Rscript -e "rmarkdown::render(
     params = list(projectName = 'GSE107401',
                   designPath = './project_GSE107401/deseq2_GSE107401-deseq2Design.txt',
                   comparisonPath = './project_GSE107401/deseq2_GSE107401-comparisonFile.txt',
+                  correspPath = './project_GSE107401/ensembl_to_symbols.tsv',
                   deseqModel = '~Condition+FooBar+Condition:FooBar',
                   prefix = './project_GSE107401/deseq2_'))"
 ```
@@ -70,6 +74,7 @@ Parameter | Default value | Definition
 projectName       |  "Project"                     |  name of the project, display in the titles (document, figures)
 designPath        |  NULL                          |  path to the design file
 comparisonPath    |  NULL                          |  path to the comparison file*
+correspPath       |  NULL                          |  path to the correspondence file between genes identifiers and symbols
 diffanaTest       |  TRUE                          |  Whether to perform the differential expression analysis or not
 expHeader         |  TRUE                          |  Whether the design table has a header or not
 deseqModel        |  "~Condition"                  |  DESeq2 model
@@ -229,4 +234,4 @@ SummarizedExperiment   |  1.38.0
 
 A Docker container containing all the packages of interest along with their dependencies is available at:
 
-(https://hub.docker.com/r/genomicpariscentre/easycontrasts)[https://hub.docker.com/r/genomicpariscentre/easycontrasts] (Version 2.0)
+[https://hub.docker.com/r/genomicpariscentre/easycontrasts](https://hub.docker.com/r/genomicpariscentre/easycontrasts) (Version 2.0)

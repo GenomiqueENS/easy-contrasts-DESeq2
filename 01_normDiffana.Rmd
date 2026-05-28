@@ -3,6 +3,7 @@ params:
   projectName: "Project"
   designPath: NULL
   comparisonPath: NULL
+  correspPath: NULL
   diffanaTest: TRUE
   expHeader: TRUE
   deseqModel: "~Condition"
@@ -176,6 +177,11 @@ The main steps are:
 - Data preparation
 - Quality control
 - Normalisation
+
+```{r display_models, eval = !is.null(params$nestedModel), echo = !is.null(params$nestedModel), results = 'asis'}
+cat("- Nested models evaluation\n")
+```
+
 - Differential expression analysis
 
 ```{r echo = FALSE, results = "asis"}
@@ -708,6 +714,7 @@ The table below summarizes all the input parameters.
 projectName     = params$projectName
 designPath      = params$designPath
 comparisonPath  = params$comparisonPath
+correspPath     = params$correspPath
 diffanaTest     = as.logical(toupper(params$diffanaTest))
 expHeader       = as.logical(toupper(params$expHeader))
 deseqModel      = params$deseqModel
@@ -726,6 +733,7 @@ saveRDS         = params$saveRDS
 c("Project name (projectName)" = projectName,
   "Path to the design file (designPath)" = designPath,
   "Path to the comparison file (comparisonPath)" = comparisonPath,
+  "Path to the correspondence file (correspPath)" = correspPath,
   "Whether to perform the differential expression analysis or not (diffanaTest)" = diffanaTest,
   "Whether the design table has a header or not (expHeader)" = expHeader,
   "DESeq2 model (deseqModel)" = deseqModel,
@@ -861,6 +869,34 @@ dds = DESeq2::DESeqDataSetFromMatrix(
   countData = count_mat,
   colData = design,
   design = as.formula(deseqModel))
+```
+
+
+```{r load_correspPath, eval = !is.null(correspPath), echo = !is.null(correspPath), results = 'asis'}
+cat('## Identifiers to symbols\n\n')
+cat('We load the table containing the correspondence between genes identifiers and symbols.\n')
+
+correspIdSymbol = read.delim(file = correspPath) %>%
+  # Force column names
+  `colnames<-`(c("ID", "symbol")) %>%
+  # Unique ID
+  dplyr::filter(!duplicated(ID)) %>%
+  # Force all ID to be present
+  dplyr::left_join(x = data.frame(ID = rownames(count_mat)),
+                   y = .,
+                   by = "ID") %>%
+  # Change missing symbols to ID
+  dplyr::mutate(symbol = ifelse(is.na(symbol),
+                                yes = ID,
+                                no = symbol))
+rownames(correspIdSymbol) = correspIdSymbol$ID
+
+# Display
+head(correspIdSymbol) %>%
+  rbind.data.frame(., "..." = rep("...", ncol(.))) %>%
+  knitr::kable("html",
+               row.names = FALSE) %>%
+  kableExtra::kable_styling(full_width = FALSE)
 ```
 
 ## Save count matrix {#save_count_matrix}
@@ -1162,21 +1198,39 @@ for (i in 1:ncol(DESeq2::counts(dds))) {
 }
 ```
 
-We represent the information as a barplot.
+We prepare a dataframe for the graphical representation.
 
-```{r fig-normalisation_most_expressed_genes, fig.width = 10, fig.height = 2+ncol(count_mat)/4}
-dplyr::left_join(x = data.frame(sample = names(maxCounts),
-                                max_counts = maxCounts),
-                 y = data.frame(sample = names(transcriptNames),
-                                gene_id = transcriptNames),
-                 by = "sample") %>%
+```{r most_expresssed_df_1, eval = is.null(correspPath), echo = is.null(correspPath)}
+most_expresssed_df = dplyr::left_join(x = data.frame(sample = names(maxCounts),
+                                                     max_counts = maxCounts),
+                                      y = data.frame(sample = names(transcriptNames),
+                                                     gene_id = transcriptNames),
+                                      by = "sample") %>%
   dplyr::mutate(sample = factor(sample, levels = levels(design$RepTechGroup))) %>%
   dplyr::left_join(x = .,
                    y = unique(design[, c("RepTechGroup", "Condition")]),
-                   by = c("sample" = "RepTechGroup")) %>%
-  # Plot
-  ggplot2::ggplot(., aes(x = sample, y = max_counts,
-                         fill = Condition, label = gene_id)) +
+                   by = c("sample" = "RepTechGroup"))
+```
+
+```{r most_expresssed_df_2, eval = !is.null(correspPath), echo = !is.null(correspPath)}
+most_expresssed_df = dplyr::left_join(x = data.frame(sample = names(maxCounts),
+                                                     max_counts = maxCounts),
+                                      y = data.frame(sample = names(transcriptNames),
+                                                     gene_id = transcriptNames,
+                                                     gene_symbol = correspIdSymbol[transcriptNames, 2]),
+                                      by = "sample") %>%
+  dplyr::mutate(gene_id = paste0(gene_id, " (", gene_symbol, ")")) %>%
+  dplyr::mutate(sample = factor(sample, levels = levels(design$RepTechGroup))) %>%
+  dplyr::left_join(x = .,
+                   y = unique(design[, c("RepTechGroup", "Condition")]),
+                   by = c("sample" = "RepTechGroup"))
+```
+
+We represent the information as a barplot.
+
+```{r fig-normalisation_most_expressed_genes, fig.width = 10, fig.height = 2+ncol(count_mat)/4}
+ggplot2::ggplot(most_expresssed_df, aes(x = sample, y = max_counts,
+                                        fill = Condition, label = gene_id)) +
   ggplot2::geom_bar(stat = "identity", col = "black") +
   ggplot2::geom_label(mapping = aes(x = sample, y = 0),
                       linewidth = 0, fill = NA, hjust = 0) +
