@@ -188,6 +188,24 @@ ENST00000002125	19
 ...
 ```
 
+### Correspondence file
+
+The correspondence file between genes identifiers and symbols should be a TSV file with a header.
+
+Example:
+
+```
+ID	symbol
+ENSMUSG00000000001	Gnai3
+ENSMUSG00000000003	Pbsn
+ENSMUSG00000000028	Cdc45
+ENSMUSG00000000031	H19
+ENSMUSG00000000037	Scml2
+ENSMUSG00000000049	Apoh
+ENSMUSG00000000056	Narf
+...
+```
+
 ## Output files
 
 Rendering the main `01_normDiffana.Rmd` document output three types of files:
