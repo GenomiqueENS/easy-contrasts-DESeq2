@@ -89,7 +89,7 @@ prefix            |  "./deseq2_"                   | string  |  Prefix to save t
 plotInteractive   |  FALSE                         | boolean |  Whether to make interactive volcano plots or not
 logoUrl           |  "logo-GenomiqueENS-90pxh.png" | string  |  Link to the logo displayed in the top left corner of the output document
 authorName        |  "Eoulsan"                     | string  |  Name of the author, for the bottom left corner of the document
-authorMail        |  "eoulsan@biologie.ens.fr"     | string  |  Mail of the author, for the bottom left corner of the document
+authorEmail       |  "eoulsan@biologie.ens.fr"     | string  |  Mail of the author, for the bottom left corner of the document
 leaveOnError      |  TRUE                          | boolean |  Whether to stop the rendering in case of error
 saveRDS           |  TRUE                          | boolean |  WWhether to save the data as RDS files
 
