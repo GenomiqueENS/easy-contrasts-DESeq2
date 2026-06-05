@@ -71,10 +71,10 @@ They are represented in orange (except `complexMode` which is internally determi
 
 Parameter | Default value | Type | Definition
 ----------|---------------|------|--------------
-projectName       |  "Project"                     | string  |  name of the project, display in the titles (document, figures)
-designPath        |  NULL                          | string  |  path to the design file
-comparisonPath    |  NULL                          | string  |  path to the comparison file*
-correspPath       |  NULL                          | string  |  path to the correspondence file between genes identifiers and symbols
+projectName       |  "Project"                     | string  |  Name of the project, display in the titles (document, figures)
+designPath        |  NULL                          | string  |  Path to the design file
+comparisonPath    |  NULL                          | string  |  Path to the comparison file*
+correspPath       |  NULL                          | string  |  Path to the correspondence file between genes identifiers and symbols
 diffanaTest       |  TRUE                          | boolean |  Whether to perform the differential expression analysis or not
 expHeader         |  TRUE                          | boolean |  Whether the design table has a header or not
 deseqModel        |  "~Condition"                  | string  |  DESeq2 model
@@ -91,7 +91,7 @@ logoUrl           |  "logo-GenomiqueENS-90pxh.png" | string  |  Link to the logo
 authorName        |  "Eoulsan"                     | string  |  Name of the author, for the bottom left corner of the document
 authorEmail       |  "eoulsan@biologie.ens.fr"     | string  |  Mail of the author, for the bottom left corner of the document
 leaveOnError      |  TRUE                          | boolean |  Whether to stop the rendering in case of error
-saveRDS           |  TRUE                          | boolean |  WWhether to save the data as RDS files
+saveRDS           |  TRUE                          | boolean |  Whether to save the data as RDS files
 
 *: The `comparisonPath` and `weightContrast` are considered only when `complexMode` is TRUE.
 
