@@ -14,7 +14,7 @@ CORRESP_PATH=$DATA_DIR/ensembl_to_symbols.tsv
 exit_if_fail() {
 
     if [ "$?" -ne 0 ]; then
-        echo "ERROR: DESeq2 output files comparison failed." >&2
+        echo "ERROR: $1" >&2
         exit 1
     fi
 }
@@ -75,7 +75,7 @@ complex_mode_test() {
     rm -rf ${PREFIX}_* 2> /dev/null
 
     docker run \
-    -ti --rm \
+    --rm \
     -v $(readlink -f ..):$(readlink -f ..) \
     -w $(readlink -f ..) \
     -u $(id -u):$(id -g) \
@@ -89,6 +89,7 @@ complex_mode_test() {
                       correspPath = './$CORRESP_PATH',
                       deseqModel = '$DESEQ_MODEL',
                       prefix = './$SCRIPT_DIRNAME/${PREFIX}_'))" > /dev/null
+    exit_if_fail "Fail to execute R script with Docker."
 
     # Test output files
     test_deseq2_common_output
@@ -97,9 +98,9 @@ complex_mode_test() {
     # Compare DESeq2 result files
     for c in $(cut -f 1 ../project_GSE107401/deseq2_GSE107401-comparisonFile.txt); do
         ./compare-deseq2-output.py --line-count $RESULT_LINE_COUNT ${PREFIX}_${PROJECT_NAME}-diffana_$c.tsv expected-v1/${PREFIX}_${PROJECT_NAME}-diffana_$c.tsv
-        exit_if_fail
+        exit_if_fail "DESeq2 output files comparison failed."
         ./compare-deseq2-output.py --line-count $RESULT_LINE_COUNT ${PREFIX}_${PROJECT_NAME}-diffana_$c.tsv expected-v2/${PREFIX}_${PROJECT_NAME}-diffana_$c.tsv
-        exit_if_fail
+        exit_if_fail "DESeq2 output files comparison failed."
     done
 
     # Test if HTML output file exists
@@ -119,7 +120,7 @@ one_reference_mode_test() {
     rm -rf ${PREFIX}_* 2> /dev/null
 
     docker run \
-    -ti --rm \
+    --rm \
     -v $(readlink -f ..):$(readlink -f ..) \
     -w $(readlink -f ..) \
     -u $(id -u):$(id -g) \
@@ -132,6 +133,7 @@ one_reference_mode_test() {
                     correspPath = './$CORRESP_PATH',
                     deseqModel = '$DESEQ_MODEL',
                     prefix = './$SCRIPT_DIRNAME/${PREFIX}_'))" > /dev/null
+    exit_if_fail "Fail to execute R script with Docker."
 
     # Test output files
     COMPARISON="KO_vs_WT"
@@ -140,9 +142,9 @@ one_reference_mode_test() {
 
     # Compare DESeq2 result files
     ./compare-deseq2-output.py --line-count $RESULT_LINE_COUNT ${PREFIX}_${PROJECT_NAME}-diffana_$COMPARISON.tsv expected-v1/${PREFIX}_${PROJECT_NAME}-diffana_$COMPARISON.tsv
-    exit_if_fail
+    exit_if_fail "DESeq2 output files comparison failed."
     ./compare-deseq2-output.py --line-count $RESULT_LINE_COUNT ${PREFIX}_${PROJECT_NAME}-diffana_$COMPARISON.tsv expected-v2/${PREFIX}_${PROJECT_NAME}-diffana_$COMPARISON.tsv
-    exit_if_fail
+    exit_if_fail "DESeq2 output files comparison failed."
 
     # Test if HTML output file exists
     is_file_exists ${PREFIX}_${PROJECT_NAME}.html
@@ -164,7 +166,7 @@ multiple_references_mode_test() {
     rm -rf ${PREFIX}_* 2> /dev/null
 
     docker run \
-    -ti --rm \
+    --rm \
     -v $(readlink -f ..):$(readlink -f ..) \
     -w $(readlink -f ..) \
     -u $(id -u):$(id -g) \
@@ -177,6 +179,7 @@ multiple_references_mode_test() {
                       correspPath = './$CORRESP_PATH',
                       deseqModel = '$DESEQ_MODEL',
                       prefix = './$SCRIPT_DIRNAME/${PREFIX}_'))" > /dev/null
+    exit_if_fail "Fail to execute R script with Docker"
 
     # Test output files
     test_deseq2_common_output
@@ -186,9 +189,9 @@ multiple_references_mode_test() {
 
         # Compare DESeq2 result files
         ./compare-deseq2-output.py --line-count $RESULT_LINE_COUNT ${PREFIX}_${PROJECT_NAME}-diffana_${c}.tsv expected-v1/${PREFIX}_${PROJECT_NAME}-diffana_${c}.tsv
-        exit_if_fail
+        exit_if_fail "DESeq2 output files comparison failed."
         #./compare-deseq2-output.py --line-count $RESULT_LINE_COUNT ${PREFIX}_${PROJECT_NAME}-diffana_${c}.tsv expected-v2/${PREFIX}_${PROJECT_NAME}-diffana_$COMPARISON.tsv
-        #exit_if_fail
+        #exit_if_fail "DESeq2 output files comparison failed."
     done
 
     # Test if HTML output file exists
