@@ -203,7 +203,7 @@ multiple_references_mode_test() {
 #
 
 # Go to the script directory
-cd "$"$SCRIPT_DIR"
+cd "$SCRIPT_DIR"
 
 complex_mode_test
 one_reference_mode_test
