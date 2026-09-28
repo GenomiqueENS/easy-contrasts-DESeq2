@@ -4,17 +4,24 @@ Compare the first n lines of two DESeq2 output files.
 Uses pytest.approx-like functionality to compare floating-point numbers.
 """
 
+import argparse
+import csv
+import math
+import os.path
 import sys
 from pathlib import Path
-import csv
-from collections import defaultdict
-import pytest
-import argparse
-import os.path
 
-def compare_floats(a, b):
-    """Compare two floating-point numbers with pytest.approx-like behavior."""
-    return a == pytest.approx(b, nan_ok=True, rel=1e-4)
+
+def compare_floats(a, b, rel=1e-4, abs_tol=1e-12):
+    """Compare two floats, equivalent to `a == pytest.approx(b, nan_ok=True, rel=1e-4)`."""
+    if a == b:
+        return True
+    if math.isnan(b):
+        return math.isnan(a)
+    if math.isinf(b):
+        return False
+    tolerance = max(rel * abs(b), abs_tol)
+    return abs(b - a) <= tolerance
 
 def read_top_n_lines(file_path, n=10):
     """Read the first n lines from a TSV file."""
