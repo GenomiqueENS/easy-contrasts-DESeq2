@@ -1,0 +1,37 @@
+name: Tests
+
+on:
+  push:
+  pull_request:
+
+env:
+  DOCKER_IMAGE: genomicpariscentre/easycontrasts:2.0
+
+jobs:
+  deseq2-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Cache Docker image
+        id: cache-docker-image
+        uses: actions/cache@v4
+        with:
+          path: /tmp/docker-image-cache/image.tar
+          key: docker-image-${{ env.DOCKER_IMAGE }}
+
+      - name: Load cached Docker image
+        if: steps.cache-docker-image.outputs.cache-hit == 'true'
+        run: docker load --input /tmp/docker-image-cache/image.tar
+
+      - name: Pull and save Docker image
+        if: steps.cache-docker-image.outputs.cache-hit != 'true'
+        run: |
+          docker pull "$DOCKER_IMAGE"
+          mkdir -p /tmp/docker-image-cache
+          docker save "$DOCKER_IMAGE" --output /tmp/docker-image-cache/image.tar
+
+      - name: Run tests
+        working-directory: tests
+        run: ./execute-tests.sh "$DOCKER_IMAGE"

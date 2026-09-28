@@ -1,7 +1,8 @@
 #!/bin/sh
 
-SCRIPT_DIRNAME=$(basename "$(dirname "$(readlink -f "$0")")")
-DOCKER_IMAGE=genomicpariscentre/easycontrasts:2.0
+SCRIPT_DIR=$(dirname "$(readlink -f "$0")")
+SCRIPT_DIRNAME=$(basename "$SCRIPT_DIR")
+DOCKER_IMAGE=${1:-genomicpariscentre/easycontrasts:2.0}
 PROJECT_NAME=GSE107401
 DATA_DIR=project_GSE107401
 CORRESP_PATH=$DATA_DIR/ensembl_to_symbols.tsv
@@ -200,6 +201,9 @@ multiple_references_mode_test() {
 #
 # Main
 #
+
+# Go to the script directory
+cd "$"$SCRIPT_DIR"
 
 complex_mode_test
 one_reference_mode_test
