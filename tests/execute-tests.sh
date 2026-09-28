@@ -203,6 +203,6 @@ multiple_references_mode_test() {
 
 complex_mode_test
 one_reference_mode_test
-#multiple_references_mode_test
+multiple_references_mode_test
 
 exit 0
