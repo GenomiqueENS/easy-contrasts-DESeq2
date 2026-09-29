@@ -46,7 +46,7 @@ def parse_numeric(value):
     except ValueError:
         return value
 
-def compare_deseq2_files(file1, file2, rel_tol=1e-6, abs_tol=1e-12, top_n=9):
+def compare_deseq2_files(file1, file2, top_n=10):
     """
     Compare the first n lines of two DESeq2 output files.
 
@@ -167,16 +167,15 @@ def main():
     args = parser.parse_args()
 
     file1 = Path(args.file1)
-    file2 = Path(args.file1)
+    file2 = Path(args.file2)
 
     if not file1.exists() or not file2.exists():
         print(f"Error: One or both files do not exist ({file1} or {file2}).")
         sys.exit(1)
-
-    are_equal, report = compare_deseq2_files(file1, file2, args.line_count)
+    are_equal, report = compare_deseq2_files(file1, file2, top_n=args.line_count)
 
     if not are_equal:
-        print(f"\n❌ Differences detected between the two files ({file1} vs {file2}): ")
+        print(f"\n❌ Differences detected between the two files ({file1} vs {file2}) in the first {args.line_count} line(s): ")
         print(report)
 
     sys.exit(0 if are_equal else 1)
