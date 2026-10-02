@@ -1,7 +1,7 @@
 # Related to the tests
 **html
-project_*
 .Rhistory
+tests/deseq2-*
 
 # Related to the environmnent
 env/20**
