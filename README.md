@@ -106,7 +106,7 @@ The design file should include at least the following columns: *Name*, *Conditio
 * **Name**: the names of your samples
 * **Condition**: the biological replicates. All biological replicates should have the same **Condition** value
 * **RepTechGroup**: the technical replicates. All technical replicates should have the same **RepTechGroup** value to be pooled together
-* **Reference**: conditions to use as a reference in the differential expression analysis should have a **Reference** value set to 0. Conditions to ignore should have a negative value. Other conditions to be compared to the reference must have a positive value.
+* **Reference**: conditions to use as a reference in the differential expression analysis should have a **Reference** value greater than 0. Conditions to ignore should have a negative value. Other conditions to be compared to the reference must have a non-negative value. See more details below.
 
 Notes:
 
@@ -118,8 +118,8 @@ Notes:
 The **Reference** column should be filled:
 
 - Reference < 0: the samples are considered for the normalisation step only but not by the differential expression analysis
-- Reference = 0: the condition associated with these samples is considered as a reference in the differential expression analysis
-- Reference > 0: the condition associated with these samples is compared to each condition having a lower reference value
+- Reference = 0: the condition(s) associated with these samples is (are) never used as a reference
+- Reference > 0: the condition associated with these samples is compared to all conditions with a lower 'Reference' number
 
 Example:
 
