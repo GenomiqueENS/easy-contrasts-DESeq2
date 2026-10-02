@@ -168,10 +168,11 @@ multiple_references_mode_test() {
     DESIGN_PATH=$DATA_DIR/deseq2_GSE107401-deseq2Design-multi-references.txt
     COMPARISON_PATH=
     PREFIX=deseq2-multi-references
+    RESULT_LINE_COUNT=100
     declare -A RESULT_LINE_COUNT_DICT
     RESULT_LINE_COUNT_DICT["R0_vs_R1"]=2
     RESULT_LINE_COUNT_DICT["R0_vs_R2"]=3
-    RESULT_LINE_COUNT_DICT["R2_vs_R1"]=1
+    #RESULT_LINE_COUNT_DICT["R2_vs_R1"]=0
 
     # Remove previous output files
     rm -rf ${PREFIX}_* 2> /dev/null
@@ -199,10 +200,12 @@ multiple_references_mode_test() {
         test_deseq2_comparison_files $c
 
         # Compare DESeq2 result files
-        ./compare-deseq2-output.py --line-count ${RESULT_LINE_COUNT_DICT[$c]} ${PREFIX}_${PROJECT_NAME}-diffana_${c}.tsv expected-v1/${PREFIX}_${PROJECT_NAME}-diffana_${c}.tsv
+	if [[ -v RESULT_LINE_COUNT_DICT[$c] ]]; then
+            ./compare-deseq2-output.py --line-count ${RESULT_LINE_COUNT_DICT[$c]} ${PREFIX}_${PROJECT_NAME}-diffana_${c}.tsv expected-v1/${PREFIX}_${PROJECT_NAME}-diffana_${c}.tsv
+            exit_if_fail "DESeq2 output files comparison failed."
+	fi
+        ./compare-deseq2-output.py --line-count ${RESULT_LINE_COUNT} ${PREFIX}_${PROJECT_NAME}-diffana_${c}.tsv expected-v2/${PREFIX}_${PROJECT_NAME}-diffana_${c}.tsv
         exit_if_fail "DESeq2 output files comparison failed."
-        #./compare-deseq2-output.py --line-count ${RESULT_LINE_COUNT_DICT[$c]} ${PREFIX}_${PROJECT_NAME}-diffana_${c}.tsv expected-v2/${PREFIX}_${PROJECT_NAME}-diffana_$COMPARISON.tsv
-        #exit_if_fail "DESeq2 output files comparison failed."
     done
 
     # Test if HTML output file exists
